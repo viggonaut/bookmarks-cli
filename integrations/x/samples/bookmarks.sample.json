@@ -1,0 +1,60 @@
+[
+  {
+    "id": "1899900000000000001",
+    "text": "Good training systems come from boring consistency, not heroic motivation. Small reps compound faster than motivation spikes.",
+    "created_at": "2026-03-18T08:45:00Z",
+    "bookmarked_at": "2026-03-20T11:15:00Z",
+    "lang": "en",
+    "author": {
+      "id": "42",
+      "name": "Coach Example",
+      "username": "coachx"
+    },
+    "entities": {
+      "hashtags": [
+        {
+          "tag": "training"
+        }
+      ],
+      "mentions": [],
+      "urls": []
+    },
+    "public_metrics": {
+      "like_count": 12,
+      "retweet_count": 2,
+      "reply_count": 1,
+      "quote_count": 0
+    }
+  },
+  {
+    "id": "1899900000000000002",
+    "text": "Agents get more useful when the memory layer is portable. Design the storage contract before you optimize the interface.",
+    "created_at": "2026-03-19T09:30:00Z",
+    "bookmarked_at": "2026-03-20T11:16:00Z",
+    "lang": "en",
+    "author": {
+      "id": "77",
+      "name": "Systems Writer",
+      "username": "syswriter"
+    },
+    "entities": {
+      "hashtags": [
+        {
+          "tag": "agents"
+        }
+      ],
+      "mentions": [],
+      "urls": [
+        {
+          "expanded_url": "https://example.com/memory-contracts"
+        }
+      ]
+    },
+    "public_metrics": {
+      "like_count": 33,
+      "retweet_count": 9,
+      "reply_count": 4,
+      "quote_count": 1
+    }
+  }
+]

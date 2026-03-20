@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "personal-os"
+version = "0.1.0"
+description = "Personal influence pipeline for capturing X bookmarks and other external content into agent-usable Markdown."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Vignir" }]
+license = { text = "MIT" }
+
+[project.scripts]
+personal-os = "personal_os.cli:main"
+
+[tool.setuptools]
+packages = ["personal_os", "personal_os.integrations"]

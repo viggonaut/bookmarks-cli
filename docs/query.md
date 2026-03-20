@@ -1,0 +1,41 @@
+# Query Workflow
+
+V1 retrieval is local-file-first.
+
+The initial retrieval flow queries stored Markdown artifacts under `personal-influence`, not the source APIs.
+
+## Why
+
+- avoids repeated API cost
+- uses enriched data rather than raw payloads only
+- works for humans and agents over the same stored artifacts
+- preserves direct links back to the original source via `canonical_url`
+
+## CLI
+
+```bash
+python3 -m personal_os query x-bookmarks --text "codex agents" --limit 5
+python3 -m personal_os query x-bookmarks --tag agents --limit 10
+python3 -m personal_os query x-bookmarks --person @danshipper --format json
+python3 -m personal_os query x-bookmarks --theme agents --author dan --limit 5
+```
+
+## Retrieval model
+
+The query command currently supports:
+
+- text search across title, summary, key ideas, body text, author names/handles, and canonical URL
+- exact filters over tags
+- exact filters over themes
+- exact filters over people
+- author matching
+
+## Regenerating older artifacts
+
+If you improve enrichment heuristics, regenerate Markdown from the raw payload snapshots:
+
+```bash
+python3 -m personal_os rebuild x-bookmarks
+```
+
+That rewrites stored Markdown from `_meta/raw/x/` without re-fetching bookmarks from the X API.

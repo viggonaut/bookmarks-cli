@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://personal-os.local/schemas/influence-item.schema.json",
+  "title": "Influence Item Frontmatter",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "item_id",
+    "source_type",
+    "content_kind",
+    "capture_kind",
+    "title",
+    "canonical_url",
+    "source_created_at",
+    "captured_at",
+    "processed_at",
+    "authors",
+    "tags",
+    "themes",
+    "people",
+    "entities",
+    "summary",
+    "key_ideas",
+    "raw_text_hash",
+    "embedding",
+    "storage",
+    "source_metadata"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "item_id": {
+      "type": "string"
+    },
+    "source_type": {
+      "type": "string"
+    },
+    "content_kind": {
+      "type": "string"
+    },
+    "capture_kind": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "canonical_url": {
+      "type": "string",
+      "description": "Direct URL to the original source item. Agents should be able to return this link so the user can jump back to the source context."
+    },
+    "source_created_at": {
+      "type": "string"
+    },
+    "captured_at": {
+      "type": "string"
+    },
+    "processed_at": {
+      "type": "string"
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "handle": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "language": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "themes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "people": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "summary": {
+      "type": "string"
+    },
+    "key_ideas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "raw_text_hash": {
+      "type": "string"
+    },
+    "embedding": {
+      "type": "object",
+      "required": [
+        "status",
+        "vector_store_id"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "vector_store_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "storage": {
+      "type": "object",
+      "required": [
+        "markdown_path",
+        "raw_payload_path"
+      ],
+      "properties": {
+        "markdown_path": {
+          "type": "string"
+        },
+        "raw_payload_path": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "source_metadata": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}
