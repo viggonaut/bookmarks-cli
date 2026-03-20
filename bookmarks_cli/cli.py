@@ -217,7 +217,7 @@ def _run_rebuild_x_bookmarks(settings: Settings, args: argparse.Namespace) -> in
         rebuilt_count += 1
 
     print(
-        "operation=rebuild source=raw_x rebuilt={rebuilt} influence_path={path}".format(
+        "operation=rebuild source=raw_x rebuilt={rebuilt} archive_path={path}".format(
             rebuilt=rebuilt_count,
             path=settings.influence_path,
         )

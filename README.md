@@ -1,14 +1,14 @@
 # bookmarks-cli
 
-CLI for syncing bookmarked and saved content into portable Markdown, with X bookmarks as v1.
+Local-first CLI for capturing, archiving, and querying saved content in portable Markdown, with X bookmarks as the first implemented source.
 
-`bookmarks-cli` is a local-first bookmark capture and processing tool. It pulls bookmarked or saved items from external platforms, normalizes them into a stable Markdown contract, and writes them into a separate data directory outside the repo.
+`bookmarks-cli` is a local-first saved-content capture and processing tool. It pulls bookmarked or saved items from external platforms, normalizes them into a stable artifact contract, and writes them into a separate archive directory outside the repo.
 
-## Main use case right now
+## Current supported source
 
-V1 is centered on X bookmarks.
+X bookmarks are the first implemented source.
 
-The current end-to-end workflow is:
+The current end-to-end workflow for X is:
 
 1. Authenticate your X account locally with OAuth 2.0 PKCE
 2. Run a one-time onboarding backfill of your existing bookmarks
@@ -19,15 +19,15 @@ The current end-to-end workflow is:
    - raw payload snapshot
    - metadata that agents can parse and use
 
-## V1 scope
+## Current implementation
 
-- Structured bookmark artifacts stored as Markdown with YAML frontmatter
+- Structured saved-content artifacts stored as Markdown with YAML frontmatter
 - Configurable output path via `BOOKMARKS_PATH` (`INFLUENCE_PATH` still works as a legacy fallback)
 - Idempotent storage layout under your configured archive path
-- First ingestion path for X bookmarks
+- X bookmarks as the first implemented capture adapter
 - One-time onboarding backfill plus incremental sync for X bookmarks
 - Both API-based and file-based X ingest paths
-- Clear extension points for additional bookmarked/saved sources later
+- A shared artifact contract designed for additional saved-content sources later
 
 ## Repo layout
 
@@ -45,7 +45,7 @@ The current end-to-end workflow is:
 By default the system writes outside the repo:
 
 ```text
-~/personal-influence/
+~/bookmarks-archive/
   x/
   _meta/
     raw/
@@ -53,6 +53,13 @@ By default the system writes outside the repo:
 ```
 
 Future sources can add sibling folders later. V1 only requires `x/` plus `_meta/`.
+
+## Capture support model
+
+- Use official APIs when they are available and reliable
+- Keep file and export ingest as first-class fallback paths
+- Let browser automation target the same normalized contract when an API is limited or unstable
+- Keep the storage, enrichment, and query layers stable even if capture changes
 
 ## Quick start
 
@@ -142,7 +149,8 @@ python3 -m bookmarks_cli ingest x-bookmarks --input path/to/bookmarks.json
 - Markdown is the shared memory layer
 - Obsidian is an optional interface, not a dependency
 - Repo code and bookmark data stay separate
-- X bookmark ingestion is built around a stable normalized contract so API and browser/file fallback paths can share the same pipeline
+- Capture adapters are source-specific; the artifact contract is source-agnostic
+- X bookmark ingestion is the current reference implementation for that contract, so API and browser/file fallback paths can share the same pipeline
 - Every stored bookmark artifact must preserve a direct source link so agents can send you back to the original content
 
 ## CLI entrypoints

@@ -2,7 +2,7 @@
 
 V1 retrieval is local-file-first.
 
-The initial retrieval flow queries stored Markdown artifacts under `personal-influence`, not the source APIs.
+The initial retrieval flow queries stored Markdown artifacts under `BOOKMARKS_PATH`, not the source APIs.
 
 ## Why
 

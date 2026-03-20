@@ -1,6 +1,6 @@
 # X Bookmarks
 
-V1 supports a shared ingestion pipeline with multiple capture paths.
+X bookmarks are the first reference implementation of the shared ingestion pipeline.
 
 ## Supported modes
 
@@ -24,6 +24,8 @@ So the pipeline is structured around a normalized bookmark contract:
 - manual exports can be imported immediately
 
 That keeps storage and enrichment stable even if capture changes.
+
+This X adapter is also the reference pattern for future sources: capture can vary by platform, but the stored artifact contract should stay stable.
 
 ## Fallback plan
 

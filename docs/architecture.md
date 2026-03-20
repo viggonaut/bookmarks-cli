@@ -1,32 +1,32 @@
 # Architecture
 
-`bookmarks-cli` is the automation layer. The configured external archive path from `BOOKMARKS_PATH` is the durable bookmark store.
+`bookmarks-cli` is the automation layer around a local archive directory. The configured external path from `BOOKMARKS_PATH` is the durable store for saved-content artifacts.
 
 ## System boundaries
 
 - `bookmarks-cli`
-  - bookmark-source integrations
+  - source integrations
   - normalization
   - enrichment
   - schemas
   - prompts
   - CLI entrypoints
-- bookmark archive
-  - generated Markdown bookmark artifacts
+- archive directory
+  - generated Markdown artifacts
   - raw source payload snapshots
   - sync state
   - future derived artifacts like embeddings or indexes
 
 ## Processing model
 
-The pipeline is intentionally linear in v1:
+The pipeline is intentionally linear in v1 and is meant to stay stable across sources:
 
 1. Capture
 2. Normalize
 3. Enrich
 4. Persist
 
-For X bookmarks the flow is:
+X bookmarks are the first implemented adapter, so the current concrete flow is:
 
 1. Fetch bookmarks from either an API response or a local file
 2. Determine the diff against local sync state
@@ -42,6 +42,7 @@ For X bookmarks the flow is:
 ## Design constraints
 
 - Capture must stay low-friction
+- Capture adapters can vary by source without changing the stored artifact contract
 - Foldering in source apps is not the main retrieval model
 - Stored bookmark artifacts must be readable by both humans and agents
 - The storage shape must survive interface changes
@@ -52,4 +53,4 @@ For X bookmarks the flow is:
 - Easy to inspect and edit
 - Works with Obsidian, editors, git, and retrieval/indexing tools
 - Keeps the raw human-visible representation and machine-parseable metadata together
-- Supports a future mix of metadata filters, tags, and embeddings
+- Supports a future mix of metadata filters, tags, and embeddings across sources

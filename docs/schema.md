@@ -1,6 +1,6 @@
-# Bookmark Artifact Schema
+# Saved Content Artifact Schema
 
-Each stored bookmark artifact is a Markdown file with YAML frontmatter.
+Each stored artifact is a Markdown file with YAML frontmatter.
 
 ## Shared frontmatter fields
 

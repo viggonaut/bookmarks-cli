@@ -17,7 +17,7 @@ class ConfigTests(unittest.TestCase):
             nested.mkdir(parents=True)
             (repo / "pyproject.toml").write_text("[project]\nname='bookmarks-cli'\n", encoding="utf-8")
             (repo / ".env").write_text(
-                "INFLUENCE_PATH=~/personal-influence-test\nX_CLIENT_ID=test-client-id\n",
+                "INFLUENCE_PATH=~/bookmarks-archive-test\nX_CLIENT_ID=test-client-id\n",
                 encoding="utf-8",
             )
 
