@@ -1,10 +1,8 @@
 # bookmarks-cli
 
-Local-first CLI for capturing, archiving, and querying saved content in portable Markdown, with X bookmarks as the first implemented source.
+Local-first CLI for capturing and querying saved content in portable Markdown.
 
-`bookmarks-cli` is a local-first saved-content capture and processing tool. It pulls bookmarked or saved items from external platforms, normalizes them into a stable artifact contract, and writes them into a separate archive directory outside the repo.
-
-## Current supported source
+## Current workflow
 
 X bookmarks are the first implemented source.
 
@@ -23,7 +21,7 @@ The current end-to-end workflow for X is:
 
 - Structured saved-content artifacts stored as Markdown with YAML frontmatter
 - Configurable output path via `BOOKMARKS_PATH` (`INFLUENCE_PATH` still works as a legacy fallback)
-- Idempotent storage layout under your configured archive path
+- Idempotent storage layout under your configured data path
 - X bookmarks as the first implemented capture adapter
 - One-time onboarding backfill plus incremental sync for X bookmarks
 - Both API-based and file-based X ingest paths
@@ -45,7 +43,7 @@ The current end-to-end workflow for X is:
 By default the system writes outside the repo:
 
 ```text
-~/bookmarks-archive/
+~/bookmarks-data/
   x/
   _meta/
     raw/

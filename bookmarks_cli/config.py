@@ -97,7 +97,7 @@ def load_settings(repo_root: Optional[Path] = None, env_file: str = ".env") -> S
 
     influence_path = _expand_path(
         os.environ.get("BOOKMARKS_PATH")
-        or os.environ.get("INFLUENCE_PATH", str(Path("~/bookmarks-archive").expanduser()))
+        or os.environ.get("INFLUENCE_PATH", str(Path("~/bookmarks-data").expanduser()))
     )
     input_path = os.environ.get("X_BOOKMARKS_INPUT_PATH")
 
