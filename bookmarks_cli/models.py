@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from personal_os.frontmatter import render_frontmatter
+from bookmarks_cli.frontmatter import render_frontmatter
 
 
 @dataclass

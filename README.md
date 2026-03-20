@@ -1,8 +1,8 @@
-# personal-os
+# bookmarks-cli
 
-Personal influence pipeline for capturing X bookmarks and other external content into agent-usable Markdown.
+CLI for syncing bookmarked and saved content into portable Markdown, with X bookmarks as v1.
 
-`personal-os` is the code and automation layer for a personal influence pipeline. It captures external content, enriches it into agent-usable structure, and writes portable Markdown artifacts into a separate data directory, typically `~/personal-influence/`.
+`bookmarks-cli` is a local-first bookmark capture and processing tool. It pulls bookmarked or saved items from external platforms, normalizes them into a stable Markdown contract, and writes them into a separate data directory outside the repo.
 
 ## Main use case right now
 
@@ -21,23 +21,23 @@ The current end-to-end workflow is:
 
 ## V1 scope
 
-- Structured influence artifacts stored as Markdown with YAML frontmatter
-- Configurable output path via `INFLUENCE_PATH`
-- Idempotent storage layout under `~/personal-influence/`
+- Structured bookmark artifacts stored as Markdown with YAML frontmatter
+- Configurable output path via `BOOKMARKS_PATH` (`INFLUENCE_PATH` still works as a legacy fallback)
+- Idempotent storage layout under your configured archive path
 - First ingestion path for X bookmarks
 - One-time onboarding backfill plus incremental sync for X bookmarks
 - Both API-based and file-based X ingest paths
-- Clear extension points for podcasts, articles, embeddings, and richer enrichment
+- Clear extension points for additional bookmarked/saved sources later
 
 ## Repo layout
 
 - `docs/` architecture, schema, and integration notes
 - `integrations/` source-specific examples and contracts
-- `processing/` processing-layer notes
+- `processing/` bookmark-processing notes
 - `prompts/` future LLM enrichment prompts
 - `schemas/` machine-readable schema definitions
 - `scripts/` thin local entrypoints
-- `personal_os/` Python implementation
+- `bookmarks_cli/` Python implementation
 - `tests/` stdlib test coverage
 
 ## Data layout
@@ -47,64 +47,60 @@ By default the system writes outside the repo:
 ```text
 ~/personal-influence/
   x/
-  podcasts/
-  articles/
-  concepts/
-  people/
-  themes/
-  daily/
   _meta/
     raw/
     state/
 ```
 
+Future sources can add sibling folders later. V1 only requires `x/` plus `_meta/`.
+
 ## Quick start
 
-1. Copy `.env.example` to `.env` and set `INFLUENCE_PATH`.
+1. Copy `.env.example` to `.env` and set `BOOKMARKS_PATH`.
 2. Add your X app client ID to `.env`.
 3. Initialize the output structure:
 
 ```bash
-python3 -m personal_os init
+python3 -m bookmarks_cli init
 ```
 
 4. Check configuration:
 
 ```bash
-python3 -m personal_os doctor
+python3 -m bookmarks_cli doctor
 ```
 
 5. Authenticate X API access:
 
 ```bash
-python3 -m personal_os auth x-login
+python3 -m bookmarks_cli auth x-login
 ```
 
 6. Run the one-time onboarding import for your existing X bookmarks:
 
 ```bash
-python3 -m personal_os backfill x-bookmarks
+python3 -m bookmarks_cli backfill x-bookmarks
 ```
 
 7. Run incremental sync later to pull only new bookmarks:
 
 ```bash
-python3 -m personal_os sync x-bookmarks
+python3 -m bookmarks_cli sync x-bookmarks
 ```
 
 8. Optional: ingest bookmarks from a local JSON file instead of the API:
 
 ```bash
-python3 -m personal_os ingest x-bookmarks --input integrations/x/samples/bookmarks.sample.json
+python3 -m bookmarks_cli ingest x-bookmarks --input integrations/x/samples/bookmarks.sample.json
 ```
 
 9. Query stored X bookmarks locally:
 
 ```bash
-python3 -m personal_os query x-bookmarks --text "codex agents" --limit 5
+python3 -m bookmarks_cli query x-bookmarks --text "codex agents" --limit 5
 ```
 
-If `X_BOOKMARKS_INPUT_PATH` is set, `sync x-bookmarks` uses file mode. If local X OAuth state is available, it uses API mode.
+If `X_BOOKMARKS_INPUT_PATH` is set, `sync x-bookmarks` uses file mode. Otherwise the default is API mode.
 
 ## X Bookmark Flow
 
@@ -128,16 +124,16 @@ The X storage contract is:
 ## Core commands
 
 ```bash
-python3 -m personal_os init
-python3 -m personal_os doctor
-python3 -m personal_os auth x-login
-python3 -m personal_os auth x-status
-python3 -m personal_os backfill x-bookmarks
-python3 -m personal_os sync x-bookmarks
-python3 -m personal_os rebuild x-bookmarks
-python3 -m personal_os query x-bookmarks --text "agents" --limit 5
-python3 -m personal_os sync x-bookmarks --source file --input path/to/bookmarks.json
-python3 -m personal_os ingest x-bookmarks --input path/to/bookmarks.json
+python3 -m bookmarks_cli init
+python3 -m bookmarks_cli doctor
+python3 -m bookmarks_cli auth x-login
+python3 -m bookmarks_cli auth x-status
+python3 -m bookmarks_cli backfill x-bookmarks
+python3 -m bookmarks_cli sync x-bookmarks
+python3 -m bookmarks_cli rebuild x-bookmarks
+python3 -m bookmarks_cli query x-bookmarks --text "agents" --limit 5
+python3 -m bookmarks_cli sync x-bookmarks --source file --input path/to/bookmarks.json
+python3 -m bookmarks_cli ingest x-bookmarks --input path/to/bookmarks.json
 ```
 
 ## Current design choices
@@ -145,28 +141,28 @@ python3 -m personal_os ingest x-bookmarks --input path/to/bookmarks.json
 - Capture first, classify later
 - Markdown is the shared memory layer
 - Obsidian is an optional interface, not a dependency
-- Repo code and personal influence data stay separate
+- Repo code and bookmark data stay separate
 - X bookmark ingestion is built around a stable normalized contract so API and browser/file fallback paths can share the same pipeline
-- Every stored influence item must preserve a direct source link so agents can send you back to the original content
+- Every stored bookmark artifact must preserve a direct source link so agents can send you back to the original content
 
 ## CLI entrypoints
 
-For humans in an interactive shell, `personal-os` is the friendly command.
+For humans in an interactive shell, `bookmarks-cli` is the friendly command.
 
 For agents and automated runtimes, the canonical entrypoint is:
 
 ```bash
-python3 -m personal_os sync x-bookmarks
+python3 -m bookmarks_cli sync x-bookmarks
 ```
 
 Interactive-shell alternatives:
 
 ```bash
-personal-os sync x-bookmarks
-bash scripts/personal-os sync x-bookmarks
+bookmarks-cli sync x-bookmarks
+bash scripts/bookmarks-cli sync x-bookmarks
 ```
 
-The `personal-os` command is also defined in [pyproject.toml](pyproject.toml). Installing it globally depends on your local Python packaging setup.
+The `bookmarks-cli` command is also defined in [pyproject.toml](pyproject.toml). Installing it globally depends on your local Python packaging setup.
 
 If you install it with:
 

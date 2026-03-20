@@ -1,6 +1,6 @@
 import unittest
 
-from personal_os.frontmatter import render_frontmatter
+from bookmarks_cli.frontmatter import render_frontmatter
 
 
 class FrontmatterTests(unittest.TestCase):

@@ -31,7 +31,7 @@ X_OAUTH_SCOPES=bookmark.read tweet.read users.read offline.access
 Run:
 
 ```bash
-python3 -m personal_os auth x-login
+python3 -m bookmarks_cli auth x-login
 ```
 
 That command:
@@ -49,11 +49,11 @@ That command:
 Run the onboarding import:
 
 ```bash
-python3 -m personal_os backfill x-bookmarks
+python3 -m bookmarks_cli backfill x-bookmarks
 ```
 
 Then use incremental sync:
 
 ```bash
-python3 -m personal_os sync x-bookmarks
+python3 -m bookmarks_cli sync x-bookmarks
 ```

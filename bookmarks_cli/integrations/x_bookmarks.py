@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 import json
 
-from personal_os.enrichment import (
+from bookmarks_cli.enrichment import (
     build_title,
     clean_text,
     extract_entities,
@@ -21,8 +21,8 @@ from personal_os.enrichment import (
     summarize_text,
     unique,
 )
-from personal_os.models import Author, InfluenceItem
-from personal_os.storage import parse_timestamp, utc_now_iso
+from bookmarks_cli.models import Author, InfluenceItem
+from bookmarks_cli.storage import parse_timestamp, utc_now_iso
 
 
 def _sort_bookmarks_newest_first(bookmarks: List["XBookmark"]) -> List["XBookmark"]:

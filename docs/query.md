@@ -14,10 +14,10 @@ The initial retrieval flow queries stored Markdown artifacts under `personal-inf
 ## CLI
 
 ```bash
-python3 -m personal_os query x-bookmarks --text "codex agents" --limit 5
-python3 -m personal_os query x-bookmarks --tag agents --limit 10
-python3 -m personal_os query x-bookmarks --person @danshipper --format json
-python3 -m personal_os query x-bookmarks --theme agents --author dan --limit 5
+python3 -m bookmarks_cli query x-bookmarks --text "codex agents" --limit 5
+python3 -m bookmarks_cli query x-bookmarks --tag agents --limit 10
+python3 -m bookmarks_cli query x-bookmarks --person @danshipper --format json
+python3 -m bookmarks_cli query x-bookmarks --theme agents --author dan --limit 5
 ```
 
 ## Retrieval model
@@ -35,7 +35,7 @@ The query command currently supports:
 If you improve enrichment heuristics, regenerate Markdown from the raw payload snapshots:
 
 ```bash
-python3 -m personal_os rebuild x-bookmarks
+python3 -m bookmarks_cli rebuild x-bookmarks
 ```
 
 That rewrites stored Markdown from `_meta/raw/x/` without re-fetching bookmarks from the X API.

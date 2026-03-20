@@ -38,15 +38,15 @@ The current code already supports step 2 and the downstream half of step 3.
 ## CLI
 
 ```bash
-python3 -m personal_os auth x-login
-python3 -m personal_os backfill x-bookmarks --source file --input /path/to/all-bookmarks.json
-python3 -m personal_os backfill x-bookmarks
-python3 -m personal_os rebuild x-bookmarks
-python3 -m personal_os query x-bookmarks --text "training" --limit 5
-python3 -m personal_os sync x-bookmarks
-python3 -m personal_os sync x-bookmarks --limit 50
-python3 -m personal_os sync x-bookmarks --source file --input /path/to/bookmarks.json
-python3 -m personal_os ingest x-bookmarks --input /path/to/bookmarks.json
+python3 -m bookmarks_cli auth x-login
+python3 -m bookmarks_cli backfill x-bookmarks --source file --input /path/to/all-bookmarks.json
+python3 -m bookmarks_cli backfill x-bookmarks
+python3 -m bookmarks_cli rebuild x-bookmarks
+python3 -m bookmarks_cli query x-bookmarks --text "training" --limit 5
+python3 -m bookmarks_cli sync x-bookmarks
+python3 -m bookmarks_cli sync x-bookmarks --limit 50
+python3 -m bookmarks_cli sync x-bookmarks --source file --input /path/to/bookmarks.json
+python3 -m bookmarks_cli ingest x-bookmarks --input /path/to/bookmarks.json
 ```
 
 ## Operational split

@@ -5,12 +5,12 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from personal_os.config import Settings, load_settings
-from personal_os.integrations.x_bookmarks import resolve_x_source
-from personal_os.integrations.x_bookmarks import bookmark_from_payload
-from personal_os.query import iter_markdown_items, query_items
-from personal_os.storage import read_sync_state, write_influence_item, write_sync_state, utc_now_iso
-from personal_os.x_auth import (
+from bookmarks_cli.config import Settings, load_settings
+from bookmarks_cli.integrations.x_bookmarks import resolve_x_source
+from bookmarks_cli.integrations.x_bookmarks import bookmark_from_payload
+from bookmarks_cli.query import iter_markdown_items, query_items
+from bookmarks_cli.storage import read_sync_state, write_influence_item, write_sync_state, utc_now_iso
+from bookmarks_cli.x_auth import (
     build_authorize_url,
     exchange_code_for_token,
     fetch_authenticated_user,
@@ -38,7 +38,7 @@ def _add_common_sync_flags(parser: argparse.ArgumentParser) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="personal-os")
+    parser = argparse.ArgumentParser(prog="bookmarks-cli")
     parser.add_argument("--env-file", default=".env")
 
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -94,7 +94,7 @@ def _print_doctor(settings: Settings) -> None:
     input_path = settings.x_bookmarks_input_path
     oauth_state = read_token_state(settings.x_oauth_state_file, strict=False)
     print(f"repo_root={settings.repo_root}")
-    print(f"influence_path={settings.influence_path}")
+    print(f"archive_path={settings.influence_path}")
     print(f"x_path={settings.x_path}")
     print(f"x_bookmarks_source={settings.x_bookmarks_source}")
     print(f"x_bookmarks_input_path={input_path if input_path else 'unset'}")
@@ -114,7 +114,7 @@ def _print_doctor(settings: Settings) -> None:
             else "no"
         )
     )
-    print(f"influence_path_exists={'yes' if settings.influence_path.exists() else 'no'}")
+    print(f"archive_path_exists={'yes' if settings.influence_path.exists() else 'no'}")
 
 
 def _run_init(settings: Settings) -> int:
@@ -345,7 +345,7 @@ def _run_x_bookmarks(
     write_sync_state(state_file, state_payload, dry_run=args.dry_run)
 
     print(
-        "operation={operation} source={source} seen={seen} written={written} skipped={skipped} influence_path={path}".format(
+        "operation={operation} source={source} seen={seen} written={written} skipped={skipped} archive_path={path}".format(
             operation=mode_name,
             source=resolved_mode,
             seen=seen_count,

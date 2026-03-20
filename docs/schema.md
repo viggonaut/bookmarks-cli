@@ -1,6 +1,6 @@
-# Influence Item Schema
+# Bookmark Artifact Schema
 
-Each stored influence item is a Markdown file with YAML frontmatter.
+Each stored bookmark artifact is a Markdown file with YAML frontmatter.
 
 ## Shared frontmatter fields
 
@@ -29,7 +29,7 @@ Each stored influence item is a Markdown file with YAML frontmatter.
 
 ## Field intent
 
-- Shared fields stay consistent across X, podcasts, and articles
+- Shared fields stay consistent across bookmarked or saved sources
 - `canonical_url` is a required direct link back to the original source item and should always be usable by humans and agents to jump back into the source system
 - `source_metadata` holds source-specific details without breaking the common contract
 - `embedding` is present now so vector indexing can be added later without a schema break

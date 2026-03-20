@@ -8,7 +8,7 @@ V1 keeps processing deliberately lightweight.
 2. Build a short summary
 3. Extract a few key ideas
 4. Generate lightweight tags and themes
-5. Persist both raw payload and structured Markdown
+5. Persist both raw payload and structured Markdown bookmark artifacts
 
 ## Current enrichment strategy
 

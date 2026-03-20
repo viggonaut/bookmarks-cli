@@ -2,8 +2,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from personal_os.models import Author, InfluenceItem
-from personal_os.query import iter_markdown_items, query_items
+from bookmarks_cli.models import Author, InfluenceItem
+from bookmarks_cli.query import iter_markdown_items, query_items
 
 
 class QueryTests(unittest.TestCase):

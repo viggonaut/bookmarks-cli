@@ -247,7 +247,7 @@ def resolve_api_access(
     user_id = explicit_user_id or state.get("user_id")
 
     if not access_token and not refresh_token:
-        raise ValueError("No X user access token available. Run `python3 -m personal_os auth x-login` first.")
+        raise ValueError("No X user access token available. Run `python3 -m bookmarks_cli auth x-login` first.")
 
     if token_is_expired(state):
         if not resolved_client_id or not refresh_token:

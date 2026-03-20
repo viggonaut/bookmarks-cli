@@ -1,4 +1,4 @@
-You are enriching a captured influence item for long-term human and agent retrieval.
+You are enriching a captured bookmark artifact for long-term human and agent retrieval.
 
 Return:
 

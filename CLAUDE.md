@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repo powers a personal influence pipeline.
+This repo powers a bookmark capture, sync, and query CLI.
 
 The primary active use case is X bookmarks:
 
@@ -10,19 +10,19 @@ The primary active use case is X bookmarks:
 - incremental sync via `sync x-bookmarks`
 - local retrieval over stored artifacts via `query x-bookmarks`
 
-The durable memory layer lives outside the repo at `INFLUENCE_PATH`.
+The durable bookmark archive lives outside the repo at `BOOKMARKS_PATH` (`INFLUENCE_PATH` still works as a legacy fallback).
 
 ## CLI Rule
 
 For agent execution, prefer the module entrypoint:
 
 ```bash
-python3 -m personal_os ...
+python3 -m bookmarks_cli ...
 ```
 
-Do not assume `personal-os` is on `PATH` in every runtime.
+Do not assume `bookmarks-cli` is on `PATH` in every runtime.
 
-`personal-os ...` is a convenience entrypoint for interactive shells when the user's local PATH has been configured correctly.
+`bookmarks-cli ...` is a convenience entrypoint for interactive shells when the user's local PATH has been configured correctly.
 
 ## Default Retrieval Workflow
 
@@ -40,16 +40,16 @@ query the local influence store before brainstorming from scratch.
 Default first step:
 
 ```bash
-python3 -m personal_os query x-bookmarks --text "<topic>" --limit 10
+python3 -m bookmarks_cli query x-bookmarks --text "<topic>" --limit 10
 ```
 
 If the query is broad or the result quality is mixed, follow with narrower passes:
 
 ```bash
-python3 -m personal_os query x-bookmarks --tag "<tag>" --limit 10
-python3 -m personal_os query x-bookmarks --theme "<theme>" --limit 10
-python3 -m personal_os query x-bookmarks --person "@handle" --limit 10
-python3 -m personal_os query x-bookmarks --author "<name-or-handle>" --limit 10
+python3 -m bookmarks_cli query x-bookmarks --tag "<tag>" --limit 10
+python3 -m bookmarks_cli query x-bookmarks --theme "<theme>" --limit 10
+python3 -m bookmarks_cli query x-bookmarks --person "@handle" --limit 10
+python3 -m bookmarks_cli query x-bookmarks --author "<name-or-handle>" --limit 10
 ```
 
 ## Output Expectations
@@ -72,7 +72,7 @@ When helpful, include:
 If the user wants the latest bookmarks, or asks to refresh, pull, or sync first, run:
 
 ```bash
-python3 -m personal_os sync x-bookmarks --source api
+python3 -m bookmarks_cli sync x-bookmarks --source api
 ```
 
 Then run the query workflow.
@@ -84,7 +84,7 @@ Do not run sync by default for every writing or research request. Query local ar
 If retrieval quality seems limited by old enrichment, regenerate Markdown from local raw payloads without re-fetching from X:
 
 ```bash
-python3 -m personal_os rebuild x-bookmarks
+python3 -m bookmarks_cli rebuild x-bookmarks
 ```
 
 ## Example

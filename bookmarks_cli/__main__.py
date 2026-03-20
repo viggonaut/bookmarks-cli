@@ -1,4 +1,4 @@
-from personal_os.cli import main
+from bookmarks_cli.cli import main
 
 
 if __name__ == "__main__":

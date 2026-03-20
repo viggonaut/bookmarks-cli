@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 import json
 
-from personal_os.storage import parse_timestamp
+from bookmarks_cli.storage import parse_timestamp
 
 
 def split_frontmatter(markdown_text: str) -> Tuple[Dict[str, Any], str]:

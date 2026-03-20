@@ -3,16 +3,16 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "personal-os"
+name = "bookmarks-cli"
 version = "0.1.0"
-description = "Personal influence pipeline for capturing X bookmarks and other external content into agent-usable Markdown."
+description = "CLI for syncing X bookmarks and other saved content into portable Markdown."
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [{ name = "Vignir" }]
 license = { text = "MIT" }
 
 [project.scripts]
-personal-os = "personal_os.cli:main"
+bookmarks-cli = "bookmarks_cli.cli:main"
 
 [tool.setuptools]
-packages = ["personal_os", "personal_os.integrations"]
+packages = ["bookmarks_cli", "bookmarks_cli.integrations"]

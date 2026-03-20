@@ -1,6 +1,6 @@
 import unittest
 
-from personal_os.enrichment import build_title, clean_text, extract_entities, extract_tags, extract_themes
+from bookmarks_cli.enrichment import build_title, clean_text, extract_entities, extract_tags, extract_themes
 
 
 class EnrichmentTests(unittest.TestCase):

@@ -1,21 +1,21 @@
 # Architecture
 
-`personal-os` is the automation layer. `personal-influence` is the durable memory layer.
+`bookmarks-cli` is the automation layer. The configured external archive path from `BOOKMARKS_PATH` is the durable bookmark store.
 
 ## System boundaries
 
-- `personal-os`
-  - integrations
+- `bookmarks-cli`
+  - bookmark-source integrations
   - normalization
   - enrichment
   - schemas
   - prompts
   - CLI entrypoints
-- `personal-influence`
-  - generated Markdown artifacts
+- bookmark archive
+  - generated Markdown bookmark artifacts
   - raw source payload snapshots
   - sync state
-  - future derived artifacts like embeddings or cross-item indexes
+  - future derived artifacts like embeddings or indexes
 
 ## Processing model
 
@@ -43,7 +43,7 @@ For X bookmarks the flow is:
 
 - Capture must stay low-friction
 - Foldering in source apps is not the main retrieval model
-- Stored artifacts must be readable by both humans and agents
+- Stored bookmark artifacts must be readable by both humans and agents
 - The storage shape must survive interface changes
 - Enrichment can get smarter later without changing the artifact contract
 

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Dict
 import json
 
-from personal_os.models import InfluenceItem
+from bookmarks_cli.models import InfluenceItem
 
 
 def utc_now_iso() -> str:

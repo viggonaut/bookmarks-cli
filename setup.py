@@ -2,12 +2,12 @@ from setuptools import setup
 
 
 setup(
-    name="personal-os",
+    name="bookmarks-cli",
     version="0.1.0",
-    description="Personal influence pipeline for capturing X bookmarks and other external content into agent-usable Markdown.",
+    description="CLI for syncing X bookmarks and other saved content into portable Markdown.",
     author="Vignir",
     license="MIT",
-    packages=["personal_os", "personal_os.integrations"],
-    entry_points={"console_scripts": ["personal-os=personal_os.cli:main"]},
+    packages=["bookmarks_cli", "bookmarks_cli.integrations"],
+    entry_points={"console_scripts": ["bookmarks-cli=bookmarks_cli.cli:main"]},
     python_requires=">=3.9",
 )

@@ -34,7 +34,7 @@ def _resolve_repo_root(start: Path, env_file: str) -> Path:
     for candidate in (start, *start.parents):
         if (candidate / env_file).exists():
             return candidate
-        if (candidate / "pyproject.toml").exists() and (candidate / "personal_os").exists():
+        if (candidate / "pyproject.toml").exists() and (candidate / "bookmarks_cli").exists():
             return candidate
     return start
 
@@ -57,30 +57,6 @@ class Settings:
     @property
     def x_path(self) -> Path:
         return self.influence_path / "x"
-
-    @property
-    def podcasts_path(self) -> Path:
-        return self.influence_path / "podcasts"
-
-    @property
-    def articles_path(self) -> Path:
-        return self.influence_path / "articles"
-
-    @property
-    def concepts_path(self) -> Path:
-        return self.influence_path / "concepts"
-
-    @property
-    def people_path(self) -> Path:
-        return self.influence_path / "people"
-
-    @property
-    def themes_path(self) -> Path:
-        return self.influence_path / "themes"
-
-    @property
-    def daily_path(self) -> Path:
-        return self.influence_path / "daily"
 
     @property
     def meta_path(self) -> Path:
@@ -109,12 +85,6 @@ class Settings:
     def initialize_output_dirs(self) -> None:
         for path in (
             self.x_path,
-            self.podcasts_path,
-            self.articles_path,
-            self.concepts_path,
-            self.people_path,
-            self.themes_path,
-            self.daily_path,
             self.raw_path / "x",
             self.state_path,
         ):
@@ -126,7 +96,8 @@ def load_settings(repo_root: Optional[Path] = None, env_file: str = ".env") -> S
     _parse_env_file(resolved_root / env_file)
 
     influence_path = _expand_path(
-        os.environ.get("INFLUENCE_PATH", str(Path("~/personal-influence").expanduser()))
+        os.environ.get("BOOKMARKS_PATH")
+        or os.environ.get("INFLUENCE_PATH", str(Path("~/personal-influence").expanduser()))
     )
     input_path = os.environ.get("X_BOOKMARKS_INPUT_PATH")
 

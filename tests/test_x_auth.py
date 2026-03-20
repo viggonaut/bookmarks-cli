@@ -5,7 +5,7 @@ from urllib.parse import parse_qs, urlparse
 
 from unittest.mock import patch
 
-from personal_os.x_auth import (
+from bookmarks_cli.x_auth import (
     build_authorize_url,
     generate_pkce_pair,
     merge_token_state,
@@ -56,7 +56,7 @@ class XAuthTests(unittest.TestCase):
                 },
             )
 
-            with patch("personal_os.x_auth.refresh_access_token") as refresh_mock:
+            with patch("bookmarks_cli.x_auth.refresh_access_token") as refresh_mock:
                 refresh_mock.return_value = {
                     "access_token": "fresh-token",
                     "refresh_token": "refresh-token",

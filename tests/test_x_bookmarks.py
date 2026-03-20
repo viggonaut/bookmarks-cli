@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from personal_os.integrations.x_bookmarks import FileBookmarkSource
+from bookmarks_cli.integrations.x_bookmarks import FileBookmarkSource
 
 
 class XBookmarkTests(unittest.TestCase):

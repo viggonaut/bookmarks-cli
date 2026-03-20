@@ -1,6 +1,6 @@
 import unittest
 
-from personal_os.cli import build_parser
+from bookmarks_cli.cli import build_parser
 
 
 class CliTests(unittest.TestCase):
