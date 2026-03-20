@@ -1,8 +1,25 @@
 # bookmarks-cli
 
-Local-first CLI for capturing and querying saved content in portable Markdown.
+Turn bookmarks into a local, programmable, agent-native data source.
 
-## Current workflow
+## Why This Exists
+
+`bookmarks-cli` exists to make bookmarks directly usable by coding agents during a session.
+
+The point is not that products like Readwise lack bookmark sync. The point is that `bookmarks-cli` makes local files, enrichment logic, and query workflows fully programmable and fully under your control. If that matters, it has a real reason to exist. If it does not, Readwise is the easier product to adopt.
+
+## Compared With Readwise
+
+| Question | Readwise | `bookmarks-cli` | Verdict |
+|---|---|---|---|
+| How easy is it for coding agents to use bookmarks during a session? | Possible, but indirect. Agents have to go through Readwise's app/API/export model, and the strongest local-file workflow runs through Obsidian. | Direct. Bookmarks are local artifacts and queryable through your own CLI and file layout. | Strongest reason for `bookmarks-cli`. |
+| Can I shape the bookmark data around my own workflows, like better tags, annotations, summaries, and retrieval logic? | Partially. You can organize and export within Readwise's model, but you are still fitting your workflow into their product. | Yes. You can tune enrichment, metadata, and query behavior for exactly how you and your agents work. | Strong edge to `bookmarks-cli`. |
+| Do the bookmarks live in a place I directly own and can use outside the product? | Somewhat. Readwise supports export and local sync, but local Markdown is more of an output surface than the core system, and ongoing sync is mainly via Obsidian. | Yes. Local files are the system of record. | Meaningful edge to `bookmarks-cli`. |
+| Which social platforms have bookmark support today? | Broader support today across more source types and reading workflows. | Narrower today. V1 is focused on X bookmarks. | Clear edge to Readwise. |
+| Is it polished and easily adoptable for a typical user today? | Yes. It is a mature end-user product. | No. It is currently optimized for a specific local-first workflow. | Clear edge to Readwise. |
+| Is there at least some cash savings for this use case? | Your current Readwise Full price is $7.99/month billed annually. | Estimated X API cost is roughly $1-$1.5/month for this workflow. | Some savings, but still only X right now. |
+
+## Current Scope
 
 X bookmarks are the first implemented source.
 
@@ -17,7 +34,7 @@ The current end-to-end workflow for X is:
    - raw payload snapshot
    - metadata that agents can parse and use
 
-## Current implementation
+## Current Implementation
 
 - Structured saved-content artifacts stored as Markdown with YAML frontmatter
 - Configurable output path via `BOOKMARKS_PATH` (`INFLUENCE_PATH` still works as a legacy fallback)
