@@ -88,7 +88,35 @@ class CliIntegrationTests(unittest.TestCase):
                     "https://x.com/syswriter/status/1899900000000000002",
                 )
                 self.assertEqual(payload[0]["path"], str(markdown_new))
+                self.assertGreater(payload[0]["search_score"], 0)
+                self.assertIn("title", payload[0]["matched_fields"])
+                self.assertIn("portable", payload[0]["matched_terms"])
                 self.assertIn("agents", payload[0]["tags"])
+
+                search_stdout = io.StringIO()
+                with redirect_stdout(search_stdout):
+                    exit_code = main(
+                        [
+                            "--env-file",
+                            str(env_path),
+                            "search",
+                            "x-bookmarks",
+                            "--query",
+                            "portable memory",
+                            "--format",
+                            "json",
+                        ]
+                    )
+
+                self.assertEqual(exit_code, 0)
+                search_payload = json.loads(search_stdout.getvalue())
+                self.assertEqual(len(search_payload), 1)
+                self.assertEqual(
+                    search_payload[0]["canonical_url"],
+                    "https://x.com/syswriter/status/1899900000000000002",
+                )
+                self.assertIn("exact", search_payload[0]["matched_queries"])
+                self.assertGreater(search_payload[0]["search_score"], 0)
             finally:
                 os.environ.clear()
                 os.environ.update(original_env)

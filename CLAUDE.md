@@ -37,20 +37,36 @@ When the user asks for:
 
 query the local influence store before brainstorming from scratch.
 
+If `python3 -m bookmarks_cli ...` is unavailable or the archive path is unclear, run:
+
+```bash
+python3 -m bookmarks_cli doctor
+```
+
+Do not search sibling repos, inspect `.env` files, or manually scan `BOOKMARKS_PATH` before trying the supported CLI workflow.
+
 Default first step:
 
 ```bash
-python3 -m bookmarks_cli query x-bookmarks --text "<topic>" --limit 10
+python3 -m bookmarks_cli search x-bookmarks --query "<topic>" --limit 10 --format json
 ```
 
 If the query is broad or the result quality is mixed, follow with narrower passes:
 
 ```bash
-python3 -m bookmarks_cli query x-bookmarks --tag "<tag>" --limit 10
-python3 -m bookmarks_cli query x-bookmarks --theme "<theme>" --limit 10
-python3 -m bookmarks_cli query x-bookmarks --person "@handle" --limit 10
-python3 -m bookmarks_cli query x-bookmarks --author "<name-or-handle>" --limit 10
+python3 -m bookmarks_cli query x-bookmarks --author "<name-or-handle>" --limit 10 --format json
+python3 -m bookmarks_cli query x-bookmarks --person "@handle" --limit 10 --format json
+python3 -m bookmarks_cli query x-bookmarks --theme "<theme>" --limit 10 --format json
+python3 -m bookmarks_cli query x-bookmarks --tag "<tag>" --limit 10 --format json
 ```
+
+If those passes still fail and the request depends on retrieval quality, use:
+
+```bash
+python3 -m bookmarks_cli rebuild x-bookmarks
+```
+
+Then repeat the query workflow before any manual file inspection.
 
 ## Output Expectations
 
@@ -65,6 +81,7 @@ When helpful, include:
 - title
 - summary
 - tags/themes
+- matched person or author
 - file path to the stored artifact
 
 ## Freshness Rule
@@ -87,6 +104,8 @@ If retrieval quality seems limited by old enrichment, regenerate Markdown from l
 python3 -m bookmarks_cli rebuild x-bookmarks
 ```
 
+Repeat the query workflow after rebuild before falling back to direct file inspection.
+
 ## Example
 
 For a prompt like:
@@ -99,3 +118,12 @@ default workflow:
 2. return the most relevant direct X links
 3. summarize patterns across the bookmarks
 4. optionally propose angles for the article/X post based on the retrieved material
+
+## Anti-Patterns
+
+Avoid these behaviors unless the supported CLI workflow has already failed:
+
+- scanning the bookmark archive directly with `find`, `grep`, or `rg`
+- searching sibling repos to discover bookmark storage or config
+- brainstorming from scratch before checking local X bookmarks
+- returning bookmark file paths without the direct X link from `canonical_url`

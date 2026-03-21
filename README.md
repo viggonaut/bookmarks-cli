@@ -116,7 +116,13 @@ python3 -m bookmarks_cli sync x-bookmarks
 python3 -m bookmarks_cli ingest x-bookmarks --input integrations/x/samples/bookmarks.sample.json
 ```
 
-9. Query stored X bookmarks locally:
+9. Search stored X bookmarks locally:
+
+```bash
+python3 -m bookmarks_cli search x-bookmarks --query "codex agents" --limit 5 --format json
+```
+
+10. Use the lower-level query command when you want exact field control:
 
 ```bash
 python3 -m bookmarks_cli query x-bookmarks --text "codex agents" --limit 5
@@ -153,6 +159,7 @@ python3 -m bookmarks_cli auth x-status
 python3 -m bookmarks_cli backfill x-bookmarks
 python3 -m bookmarks_cli sync x-bookmarks
 python3 -m bookmarks_cli rebuild x-bookmarks
+python3 -m bookmarks_cli search x-bookmarks --query "agents" --limit 5 --format json
 python3 -m bookmarks_cli query x-bookmarks --text "agents" --limit 5
 python3 -m bookmarks_cli sync x-bookmarks --source file --input path/to/bookmarks.json
 python3 -m bookmarks_cli ingest x-bookmarks --input path/to/bookmarks.json

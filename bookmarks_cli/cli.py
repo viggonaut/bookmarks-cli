@@ -8,7 +8,7 @@ from typing import Optional
 from bookmarks_cli.config import Settings, load_settings
 from bookmarks_cli.integrations.x_bookmarks import resolve_x_source
 from bookmarks_cli.integrations.x_bookmarks import bookmark_from_payload
-from bookmarks_cli.query import iter_markdown_items, query_items
+from bookmarks_cli.query import iter_markdown_items, query_items, search_items
 from bookmarks_cli.storage import read_sync_state, write_influence_item, write_sync_state, utc_now_iso
 from bookmarks_cli.x_auth import (
     build_authorize_url,
@@ -86,6 +86,13 @@ def build_parser() -> argparse.ArgumentParser:
     query_x_parser.add_argument("--author", default=None)
     query_x_parser.add_argument("--limit", type=int, default=10)
     query_x_parser.add_argument("--format", choices=["text", "json"], default="text")
+
+    search_parser = subparsers.add_parser("search")
+    search_subparsers = search_parser.add_subparsers(dest="search_target", required=True)
+    search_x_parser = search_subparsers.add_parser("x-bookmarks")
+    search_x_parser.add_argument("--query", required=True)
+    search_x_parser.add_argument("--limit", type=int, default=10)
+    search_x_parser.add_argument("--format", choices=["text", "json"], default="text")
 
     return parser
 
@@ -225,19 +232,8 @@ def _run_rebuild_x_bookmarks(settings: Settings, args: argparse.Namespace) -> in
     return 0
 
 
-def _run_query_x_bookmarks(settings: Settings, args: argparse.Namespace) -> int:
-    items = list(iter_markdown_items(settings.x_path))
-    results = query_items(
-        items,
-        text=args.text,
-        tags=args.tag,
-        themes=args.theme,
-        people=args.person,
-        author=args.author,
-        limit=args.limit,
-    )
-
-    if args.format == "json":
+def _print_query_results(results: list, output_format: str) -> int:
+    if output_format == "json":
         payload = [
             {
                 "title": item.title,
@@ -245,6 +241,10 @@ def _run_query_x_bookmarks(settings: Settings, args: argparse.Namespace) -> int:
                 "summary": item.summary,
                 "path": str(item.path),
                 "source_created_at": item.source_created_at,
+                "search_score": item.search_score,
+                "matched_fields": item.matched_fields,
+                "matched_terms": item.matched_terms,
+                "matched_queries": item.matched_queries,
                 "tags": item.frontmatter.get("tags", []),
                 "themes": item.frontmatter.get("themes", []),
                 "people": item.frontmatter.get("people", []),
@@ -259,6 +259,10 @@ def _run_query_x_bookmarks(settings: Settings, args: argparse.Namespace) -> int:
         if item.canonical_url:
             print(f"URL: {item.canonical_url}")
         print(f"Summary: {item.summary}")
+        if item.matched_fields:
+            print(f"Matched: {', '.join(item.matched_fields)}")
+        if item.matched_queries:
+            print(f"Queries: {', '.join(item.matched_queries)}")
         print(f"Tags: {', '.join(item.frontmatter.get('tags', []))}")
         print(f"Path: {item.path}")
         print("")
@@ -266,6 +270,30 @@ def _run_query_x_bookmarks(settings: Settings, args: argparse.Namespace) -> int:
     if not results:
         print("No matching X bookmarks found.")
     return 0
+
+
+def _run_query_x_bookmarks(settings: Settings, args: argparse.Namespace) -> int:
+    items = list(iter_markdown_items(settings.x_path))
+    results = query_items(
+        items,
+        text=args.text,
+        tags=args.tag,
+        themes=args.theme,
+        people=args.person,
+        author=args.author,
+        limit=args.limit,
+    )
+    return _print_query_results(results, args.format)
+
+
+def _run_search_x_bookmarks(settings: Settings, args: argparse.Namespace) -> int:
+    items = list(iter_markdown_items(settings.x_path))
+    results = search_items(
+        items,
+        query=args.query,
+        limit=args.limit,
+    )
+    return _print_query_results(results, args.format)
 
 
 def _run_x_bookmarks(
@@ -407,6 +435,9 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     if args.command == "query" and args.query_target == "x-bookmarks":
         return _run_query_x_bookmarks(settings, args)
+
+    if args.command == "search" and args.search_target == "x-bookmarks":
+        return _run_search_x_bookmarks(settings, args)
 
     parser.error("Unsupported command.")
     return 2

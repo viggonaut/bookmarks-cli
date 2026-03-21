@@ -14,6 +14,7 @@ The initial retrieval flow queries stored Markdown artifacts under `BOOKMARKS_PA
 ## CLI
 
 ```bash
+python3 -m bookmarks_cli search x-bookmarks --query "codex agents" --limit 5 --format json
 python3 -m bookmarks_cli query x-bookmarks --text "codex agents" --limit 5
 python3 -m bookmarks_cli query x-bookmarks --tag agents --limit 10
 python3 -m bookmarks_cli query x-bookmarks --person @danshipper --format json
@@ -29,6 +30,13 @@ The query command currently supports:
 - exact filters over themes
 - exact filters over people
 - author matching
+
+The search command adds a higher-level retrieval workflow for natural-language requests:
+
+- exact text search first
+- author and person inference when the query names someone
+- small semantic expansions for terms like companions, characters, assistants, startups, and memory
+- merged ranking across multiple passes
 
 ## Regenerating older artifacts
 
