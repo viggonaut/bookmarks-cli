@@ -6,34 +6,40 @@ Turn bookmarks into a local, programmable, agent-native data source.
 
 `bookmarks-cli` exists to make bookmarks directly usable by coding agents during a session.
 
-The point is not that products like Readwise cannot support agent workflows. Readwise now has an official MCP server and CLI, which means it can already cover a meaningful share of the "ask an agent about my reading/bookmarks" use case.
+Readwise is a strong product and now supports agent workflows through its MCP server and CLI. For many people, that will be the easier default.
 
-The point is that `bookmarks-cli` makes local files, enrichment logic, ranking, and query workflows fully programmable and fully under your control. If that level of control, ownership, and extensibility matters, it has a reason to exist. If it does not, Readwise is the easier product to adopt.
+`bookmarks-cli` is narrower. Its value is not "agents can access bookmarks at all." Its value is that the archive, enrichment logic, ranking, and retrieval interface are yours. If you want a local-first, programmable bookmark pipeline that you can shape around your own workflows, `bookmarks-cli` has a reason to exist. If you do not need that level of control, Readwise is likely the better choice.
 
 ## Compared With Readwise
 
 | Question | Readwise | `bookmarks-cli` | Verdict |
 |---|---|---|---|
-| How easy is it for coding agents to use bookmarks during a session? | Stronger than this repo originally gave it credit for. Readwise now has an official MCP server and CLI for Claude, ChatGPT, Codex, and other MCP-compatible tools, so many agent workflows are possible without building your own local pipeline. | Direct and local-first. Agents can query your archive through your own CLI and data model, without depending on a hosted product's MCP surface or schemas. | Readwise is more competitive here than before; `bookmarks-cli` still wins on control and local-first behavior. |
+| How easy is it for coding agents to use bookmarks during a session? | Strong. Readwise has an official MCP server and CLI for Claude, ChatGPT, Codex, and other MCP-compatible tools. | Strong, but in a different way. Agents query a local archive through your own CLI and schemas. | Readwise is easier to adopt. `bookmarks-cli` is better if you want the retrieval layer to be local and programmable. |
 | Can I shape the bookmark data around my own workflows, like better tags, annotations, summaries, and retrieval logic? | Partially. Readwise gives you tags, notes, export templates, and integrations, but the core data model and retrieval behavior remain Readwise-defined. | Yes. You can tune enrichment, metadata, ranking, output shape, and retrieval behavior for exactly how you and your agents work. | Real edge to `bookmarks-cli`. |
 | Do the bookmarks live in a place I directly own and can use outside the product? | Better than "somewhat." Readwise supports exports, Markdown downloads, and Obsidian sync, so the data is not trapped. But Readwise is still the primary system and local exports are downstream copies. | Yes. Local files are the system of record and the processing pipeline is yours. | `bookmarks-cli` still has the stronger ownership story, but Readwise deserves more credit here. |
 | Which social platforms have bookmark support today? | Broader support today across more source types and reading workflows. | Narrower today. V1 is focused on X bookmarks. | Clear edge to Readwise. |
 | Is it polished and easily adoptable for a typical user today? | Yes. It is a mature end-user product. | No. It is currently optimized for a specific local-first workflow. | Clear edge to Readwise. |
 | Is cost a compelling reason to switch? | Readwise Full is currently $9.99/month billed annually or $12.99/month billed monthly, and it includes Reader plus the broader Readwise product. | Estimated X API cost is roughly $1-$1.5/month for this workflow, but you are also taking on setup, maintenance, and narrower scope. | Cost alone is not a strong enough reason unless you specifically want an X-first, self-controlled pipeline. |
 
-## Honest Positioning
+## When `bookmarks-cli` Wins
 
-If you want the easiest, most polished way to let an AI assistant access what you've saved and read, Readwise is now a much stronger answer than an earlier version of this README suggested.
-
-`bookmarks-cli` is more compelling when you care about:
+`bookmarks-cli` is strongest when you care about:
 
 - local files as the system of record
-- custom enrichment and ranking logic
+- custom enrichment, ranking, and output logic
 - source-specific workflows like X bookmarks
 - independence from a third-party product's API, MCP surface, and schemas
 - a pipeline you can extend however you want
 
-If you do not need those things, Readwise is likely the better default product.
+## When Readwise Wins
+
+Readwise is the better default when you want:
+
+- the easiest setup
+- broader source coverage
+- a polished end-user product
+- agent access without owning the retrieval pipeline yourself
+- a workflow that fits comfortably inside Readwise's model
 
 ## Current Scope
 
