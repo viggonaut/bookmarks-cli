@@ -116,6 +116,8 @@ class CliIntegrationTests(unittest.TestCase):
                     "https://x.com/syswriter/status/1899900000000000002",
                 )
                 self.assertIn("exact", search_payload[0]["matched_queries"])
+                self.assertTrue(search_payload[0]["authors"])
+                self.assertIn("author:", search_payload[0]["why_relevant"])
                 self.assertGreater(search_payload[0]["search_score"], 0)
 
                 dated_search_stdout = io.StringIO()

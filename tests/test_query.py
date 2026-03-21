@@ -256,6 +256,65 @@ class QueryTests(unittest.TestCase):
             self.assertEqual(len(search_results), 1)
             self.assertEqual(search_results[0].canonical_url, "https://x.com/garrytan/status/7")
 
+    def test_search_items_handles_typos_and_from_author_phrases(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            openai_item = InfluenceItem(
+                item_id="x:8",
+                source_type="x",
+                content_kind="post",
+                capture_kind="bookmark",
+                title="@openai: Symphony launch",
+                canonical_url="https://x.com/openai/status/8",
+                source_created_at="2026-03-20T12:00:00Z",
+                captured_at="2026-03-20T17:30:32Z",
+                processed_at="2026-03-20T17:30:31Z",
+                authors=[Author(name="OpenAI", handle="openai", id="8", url="https://x.com/openai")],
+                language="en",
+                tags=["x", "bookmark", "ai"],
+                themes=["ai"],
+                people=["@openai"],
+                entities=["Symphony"],
+                summary="OpenAI Symphony launch post.",
+                key_ideas=["Symphony is now available."],
+                raw_text_hash="vwx",
+                body_text="Announcing Symphony from OpenAI.",
+                source_metadata={"external_id": "8"},
+                storage={},
+            )
+            mention_item = InfluenceItem(
+                item_id="x:9",
+                source_type="x",
+                content_kind="post",
+                capture_kind="bookmark",
+                title="@dan: OpenAI Symphony thoughts",
+                canonical_url="https://x.com/dan/status/9",
+                source_created_at="2026-03-20T13:00:00Z",
+                captured_at="2026-03-20T17:30:32Z",
+                processed_at="2026-03-20T17:30:31Z",
+                authors=[Author(name="Dan", handle="dan", id="9", url="https://x.com/dan")],
+                language="en",
+                tags=["x", "bookmark", "ai"],
+                themes=["ai"],
+                people=["@dan", "@openai"],
+                entities=["Symphony", "OpenAI"],
+                summary="Third-party post mentioning OpenAI Symphony.",
+                key_ideas=["Dan comments on OpenAI Symphony."],
+                raw_text_hash="yz1",
+                body_text="This is a third-party mention of OpenAI Symphony.",
+                source_metadata={"external_id": "9"},
+                storage={},
+            )
+            self._write_item(root, openai_item)
+            self._write_item(root, mention_item)
+
+            items = list(iter_markdown_items(root))
+            results = search_items(items, query="recent symphoni from OpenAI", limit=5)
+
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0].canonical_url, "https://x.com/openai/status/8")
+            self.assertIn("author", results[0].matched_queries)
+
 
 if __name__ == "__main__":
     unittest.main()

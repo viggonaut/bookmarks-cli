@@ -17,6 +17,7 @@ The initial retrieval flow queries stored Markdown artifacts under `BOOKMARKS_PA
 python3 -m bookmarks_cli search x-bookmarks --query "codex agents" --limit 5 --format json
 python3 -m bookmarks_cli search x-bookmarks --query "gstack" --date-from 2026-03-14 --date-to 2026-03-21 --limit 10 --format json
 python3 -m bookmarks_cli search x-bookmarks --query "gstack" --days 7 --limit 10 --format json
+python3 -m bookmarks_cli search x-bookmarks --query "symphoni" --author openai --author openaidevs --limit 10 --format json
 python3 -m bookmarks_cli query x-bookmarks --text "codex agents" --limit 5
 python3 -m bookmarks_cli query x-bookmarks --tag agents --limit 10
 python3 -m bookmarks_cli query x-bookmarks --person @danshipper --format json
@@ -39,6 +40,7 @@ The search command adds a higher-level retrieval workflow for natural-language r
 - author and person inference when the query names someone
 - small semantic expansions for terms like companions, characters, assistants, startups, and memory
 - merged ranking across multiple passes
+- strict source filtering when the request says "from <account>" or you pass `--author` / `--person`
 
 ## Regenerating older artifacts
 

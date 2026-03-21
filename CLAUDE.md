@@ -58,6 +58,14 @@ python3 -m bookmarks_cli search x-bookmarks --query "<topic>" --date-from YYYY-M
 python3 -m bookmarks_cli search x-bookmarks --query "<topic>" --days 7 --limit 10 --format json
 ```
 
+If the user says "from <person/account>" or names a likely source account, pass explicit source filters instead of relying on text matching alone:
+
+```bash
+python3 -m bookmarks_cli search x-bookmarks --query "<topic>" --author "<name-or-handle>" --person "@handle" --limit 10 --format json
+```
+
+Treat those source filters as strict. If they return no results, say so clearly before running a broader mention-only search.
+
 If the query is broad or the result quality is mixed, follow with narrower passes:
 
 ```bash

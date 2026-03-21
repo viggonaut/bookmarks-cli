@@ -11,6 +11,7 @@ from bookmarks_cli.storage import parse_timestamp
 
 
 TOKEN_RE = re.compile(r"[a-z0-9@._-]+")
+AUTHOR_HINT_RE = re.compile(r"\b(?:from|by)\s+(@?[A-Za-z0-9._-]+(?:\s+[A-Za-z0-9._-]+){0,2})", re.IGNORECASE)
 STOPWORDS = {
     "a",
     "about",
@@ -75,6 +76,7 @@ CO_OCCURRENCE_BONUS = {
     "canonical_url": 0.25,
 }
 FIELD_ORDER = tuple(FIELD_WEIGHTS.keys())
+FUZZY_MATCH_WEIGHT_FACTOR = 0.8
 TERM_EXPANSIONS = {
     "assistant": ["agents", "companion", "companions"],
     "assistants": ["agents", "assistant", "companions"],
@@ -381,6 +383,74 @@ def _within_date_window(
     return True
 
 
+def _is_near_token_match(left: str, right: str) -> bool:
+    if left == right:
+        return True
+    if len(left) < 5 or len(right) < 5:
+        return False
+    if left[0] != right[0] or abs(len(left) - len(right)) > 1:
+        return False
+
+    if len(left) == len(right):
+        mismatches = sum(1 for a, b in zip(left, right) if a != b)
+        return mismatches <= 1
+
+    shorter, longer = (left, right) if len(left) < len(right) else (right, left)
+    index_short = 0
+    index_long = 0
+    edits = 0
+    while index_short < len(shorter) and index_long < len(longer):
+        if shorter[index_short] == longer[index_long]:
+            index_short += 1
+            index_long += 1
+            continue
+        edits += 1
+        if edits > 1:
+            return False
+        index_long += 1
+    return True
+
+
+def _match_field_weight(term: str, tokens: Set[str], field_name: str) -> float:
+    if term in tokens:
+        return FIELD_WEIGHTS[field_name]
+    if any(_is_near_token_match(term, token) for token in tokens):
+        return FIELD_WEIGHTS[field_name] * FUZZY_MATCH_WEIGHT_FACTOR
+    return 0.0
+
+
+def _author_matches(item: QueryResult, author_queries: List[str]) -> bool:
+    if not author_queries:
+        return True
+    author_blob = _author_blob(item).lower()
+    return any(author_query in author_blob for author_query in author_queries)
+
+
+def _matches_constraints(
+    item: QueryResult,
+    *,
+    tags: Optional[List[str]] = None,
+    themes: Optional[List[str]] = None,
+    people: Optional[List[str]] = None,
+    authors: Optional[List[str]] = None,
+) -> bool:
+    frontmatter = item.frontmatter
+    item_tags = [str(tag).lower() for tag in frontmatter.get("tags", [])]
+    item_themes = [str(theme).lower() for theme in frontmatter.get("themes", [])]
+    item_people = [str(person).lower() for person in frontmatter.get("people", [])]
+    normalized_authors = [author.lower() for author in (authors or []) if author.strip()]
+
+    if tags and not all(tag in item_tags for tag in tags):
+        return False
+    if themes and not all(theme in item_themes for theme in themes):
+        return False
+    if people and not all(person in item_people for person in people):
+        return False
+    if not _author_matches(item, normalized_authors):
+        return False
+    return True
+
+
 def _score_text_query(item: QueryResult, text_query: str) -> Optional[QueryResult]:
     query_terms = _tokenize(text_query, drop_stopwords=True)
     if not query_terms:
@@ -400,9 +470,9 @@ def _score_text_query(item: QueryResult, text_query: str) -> Optional[QueryResul
         best_field = None
         best_weight = 0.0
         for field_name, tokens in field_tokens.items():
-            if term not in tokens:
+            weight = _match_field_weight(term, tokens, field_name)
+            if weight <= 0:
                 continue
-            weight = FIELD_WEIGHTS[field_name]
             if weight > best_weight:
                 best_field = field_name
                 best_weight = weight
@@ -483,6 +553,20 @@ def _infer_author_query(items: Iterable[QueryResult], raw_query: str) -> Optiona
     return best_value
 
 
+def _extract_author_hints(raw_query: str) -> List[str]:
+    hints = []
+    for match in AUTHOR_HINT_RE.finditer(raw_query):
+        raw_hint = match.group(1).strip().strip(".,;:!?")
+        normalized_hint = " ".join(
+            token
+            for token in raw_hint.split()
+            if token.lower() not in {"last", "recent", "week", "weeks", "month", "months", "today", "yesterday"}
+        ).strip()
+        if normalized_hint:
+            hints.append(normalized_hint.lower())
+    return _ordered_unique(hints)
+
+
 def _extract_explicit_people(raw_query: str) -> List[str]:
     handles = []
     for raw_token in TOKEN_RE.findall(raw_query):
@@ -533,12 +617,16 @@ def search_items(
     items: Iterable[QueryResult],
     *,
     query: str,
+    tags: Optional[List[str]] = None,
+    themes: Optional[List[str]] = None,
+    people: Optional[List[str]] = None,
+    authors: Optional[List[str]] = None,
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
     days: Optional[int] = None,
     limit: int = 10,
 ) -> List[QueryResult]:
-    items_list = [
+    base_items = [
         item
         for item in items
         if _within_date_window(item, date_from=date_from, date_to=date_to, days=days)
@@ -547,8 +635,27 @@ def search_items(
     if not raw_query:
         return []
 
-    explicit_people = _extract_explicit_people(raw_query)
-    inferred_author = _infer_author_query(items_list, raw_query)
+    normalized_tags = [tag.lower() for tag in (tags or [])]
+    normalized_themes = [theme.lower() for theme in (themes or [])]
+    explicit_people = _ordered_unique([person.lower() for person in (people or [])] + _extract_explicit_people(raw_query))
+    author_hints = _extract_author_hints(raw_query)
+    explicit_authors = _ordered_unique([author.lower() for author in (authors or [])] + author_hints)
+    has_source_constraint = bool(explicit_people or explicit_authors)
+
+    primary_items = [
+        item
+        for item in base_items
+        if _matches_constraints(
+            item,
+            tags=normalized_tags,
+            themes=normalized_themes,
+            people=explicit_people or None,
+            authors=explicit_authors or None,
+        )
+    ]
+    planning_items = primary_items if has_source_constraint else (primary_items or base_items)
+    inferred_author = _infer_author_query(planning_items, raw_query)
+    effective_authors = _ordered_unique(explicit_authors + ([inferred_author.lower()] if inferred_author else []))
     focused_topic = _topic_text(raw_query, inferred_author, explicit_people)
 
     plans: List[Tuple[str, Dict[str, Any], float]] = []
@@ -570,6 +677,11 @@ def search_items(
                     "text": normalized_text,
                     "author": author,
                     "people": list(normalized_people) or None,
+                    "tags": normalized_tags or None,
+                    "themes": normalized_themes or None,
+                    "date_from": date_from,
+                    "date_to": date_to,
+                    "days": days,
                 },
                 weight,
             )
@@ -580,23 +692,24 @@ def search_items(
         add_plan("focused", text=focused_topic, weight=1.2)
     if explicit_people and focused_topic:
         add_plan("person", text=focused_topic, people=explicit_people, weight=1.6)
-    if inferred_author and focused_topic:
-        add_plan("author", text=focused_topic, author=inferred_author, weight=1.8)
+    for author_query in effective_authors:
+        if focused_topic:
+            add_plan("author", text=focused_topic, author=author_query, weight=1.8)
 
     expansion_source = focused_topic or raw_query
     for expanded_text in _expanded_text_queries(expansion_source):
         add_plan("expanded", text=expanded_text, weight=0.9)
         if explicit_people:
             add_plan("expanded-person", text=expanded_text, people=explicit_people, weight=1.1)
-        if inferred_author:
-            add_plan("expanded-author", text=expanded_text, author=inferred_author, weight=1.2)
+        for author_query in effective_authors:
+            add_plan("expanded-author", text=expanded_text, author=author_query, weight=1.2)
 
     merged: Dict[Path, QueryResult] = {}
     per_plan_limit = max(limit * 3, 20)
     for label, kwargs, weight in plans:
         plan_terms = _tokenize(str(kwargs.get("text") or ""), drop_stopwords=True)
         plan_term_count = max(len(plan_terms), 1)
-        results = query_items(items_list, limit=per_plan_limit, **kwargs)
+        results = query_items(planning_items, limit=per_plan_limit, **kwargs)
         for result in results:
             coverage = max(len(result.matched_terms), 1) / plan_term_count
             weighted_score = max(result.search_score, 1.0) * weight * coverage
@@ -618,7 +731,29 @@ def search_items(
         ),
         reverse=True,
     )
-    return ranked[:limit]
+    if ranked:
+        return ranked[:limit]
+
+    if has_source_constraint:
+        return []
+
+    if primary_items and primary_items != base_items:
+        fallback_results = query_items(
+            base_items,
+            text=focused_topic or raw_query,
+            tags=normalized_tags or None,
+            themes=normalized_themes or None,
+            date_from=date_from,
+            date_to=date_to,
+            days=days,
+            limit=limit,
+        )
+        return [
+            replace(item, matched_queries=_ordered_unique(item.matched_queries + ["fallback-broad"]))
+            for item in fallback_results
+        ]
+
+    return []
 
 
 def query_items(

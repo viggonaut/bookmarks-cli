@@ -43,6 +43,29 @@ def _add_common_retrieval_flags(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--days", type=int, default=None, help="Relative trailing window in days")
 
 
+def _render_why_relevant(item) -> str:
+    parts = []
+    if item.matched_terms:
+        parts.append(f"matched terms: {', '.join(item.matched_terms)}")
+    if item.matched_fields:
+        parts.append(f"in {', '.join(item.matched_fields)}")
+    authors = item.frontmatter.get("authors", [])
+    if authors:
+        author_labels = []
+        for author in authors:
+            if not isinstance(author, dict):
+                continue
+            handle = str(author.get("handle", "")).strip()
+            name = str(author.get("name", "")).strip()
+            if handle:
+                author_labels.append(f"@{handle}")
+            elif name:
+                author_labels.append(name)
+        if author_labels:
+            parts.append(f"author: {', '.join(author_labels)}")
+    return "; ".join(parts)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="bookmarks-cli")
     parser.add_argument("--env-file", default=".env")
@@ -98,6 +121,10 @@ def build_parser() -> argparse.ArgumentParser:
     search_subparsers = search_parser.add_subparsers(dest="search_target", required=True)
     search_x_parser = search_subparsers.add_parser("x-bookmarks")
     search_x_parser.add_argument("--query", required=True)
+    search_x_parser.add_argument("--tag", action="append", default=None)
+    search_x_parser.add_argument("--theme", action="append", default=None)
+    search_x_parser.add_argument("--person", action="append", default=None)
+    search_x_parser.add_argument("--author", action="append", default=None)
     _add_common_retrieval_flags(search_x_parser)
     search_x_parser.add_argument("--limit", type=int, default=10)
     search_x_parser.add_argument("--format", choices=["text", "json"], default="text")
@@ -253,6 +280,8 @@ def _print_query_results(results: list, output_format: str) -> int:
                 "matched_fields": item.matched_fields,
                 "matched_terms": item.matched_terms,
                 "matched_queries": item.matched_queries,
+                "why_relevant": _render_why_relevant(item),
+                "authors": item.frontmatter.get("authors", []),
                 "tags": item.frontmatter.get("tags", []),
                 "themes": item.frontmatter.get("themes", []),
                 "people": item.frontmatter.get("people", []),
@@ -271,6 +300,19 @@ def _print_query_results(results: list, output_format: str) -> int:
             print(f"Matched: {', '.join(item.matched_fields)}")
         if item.matched_queries:
             print(f"Queries: {', '.join(item.matched_queries)}")
+        if item.frontmatter.get("authors"):
+            author_handles = []
+            for author in item.frontmatter.get("authors", []):
+                if not isinstance(author, dict):
+                    continue
+                handle = str(author.get("handle", "")).strip()
+                name = str(author.get("name", "")).strip()
+                if handle:
+                    author_handles.append(f"@{handle}")
+                elif name:
+                    author_handles.append(name)
+            if author_handles:
+                print(f"Authors: {', '.join(author_handles)}")
         print(f"Tags: {', '.join(item.frontmatter.get('tags', []))}")
         print(f"Path: {item.path}")
         print("")
@@ -302,6 +344,10 @@ def _run_search_x_bookmarks(settings: Settings, args: argparse.Namespace) -> int
     results = search_items(
         items,
         query=args.query,
+        tags=args.tag,
+        themes=args.theme,
+        people=args.person,
+        authors=args.author,
         date_from=args.date_from,
         date_to=args.date_to,
         days=args.days,
