@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 import json
@@ -255,6 +256,18 @@ def iter_markdown_items(root: Path) -> Iterable[QueryResult]:
     return results
 
 
+def parse_date_bound(raw_value: Optional[str], *, end_of_day: bool) -> Optional[datetime]:
+    cleaned = (raw_value or "").strip()
+    if not cleaned:
+        return None
+    if cleaned.endswith("Z") or "T" in cleaned:
+        return parse_timestamp(cleaned)
+    parsed_date = datetime.fromisoformat(cleaned)
+    if end_of_day:
+        return parsed_date.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=timezone.utc)
+    return parsed_date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=timezone.utc)
+
+
 def _author_blob(item: QueryResult) -> str:
     authors = item.frontmatter.get("authors", [])
     author_parts = []
@@ -328,6 +341,44 @@ def _ordered_unique(values: Iterable[str]) -> List[str]:
         seen.add(cleaned)
         ordered.append(cleaned)
     return ordered
+
+
+def _resolve_date_window(
+    *,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    days: Optional[int] = None,
+) -> Tuple[Optional[datetime], Optional[datetime]]:
+    start = parse_date_bound(date_from, end_of_day=False)
+    end = parse_date_bound(date_to, end_of_day=True)
+    if days is not None and days > 0:
+        now = datetime.now(timezone.utc)
+        derived_start = now - timedelta(days=days)
+        if start is None or derived_start > start:
+            start = derived_start
+        if end is None:
+            end = now
+    return start, end
+
+
+def _within_date_window(
+    item: QueryResult,
+    *,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    days: Optional[int] = None,
+) -> bool:
+    window_start, window_end = _resolve_date_window(date_from=date_from, date_to=date_to, days=days)
+    if window_start is None and window_end is None:
+        return True
+    if not item.source_created_at:
+        return False
+    created_at = parse_timestamp(item.source_created_at)
+    if window_start is not None and created_at < window_start:
+        return False
+    if window_end is not None and created_at > window_end:
+        return False
+    return True
 
 
 def _score_text_query(item: QueryResult, text_query: str) -> Optional[QueryResult]:
@@ -482,9 +533,16 @@ def search_items(
     items: Iterable[QueryResult],
     *,
     query: str,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    days: Optional[int] = None,
     limit: int = 10,
 ) -> List[QueryResult]:
-    items_list = list(items)
+    items_list = [
+        item
+        for item in items
+        if _within_date_window(item, date_from=date_from, date_to=date_to, days=days)
+    ]
     raw_query = (query or "").strip()
     if not raw_query:
         return []
@@ -571,6 +629,9 @@ def query_items(
     themes: Optional[List[str]] = None,
     people: Optional[List[str]] = None,
     author: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    days: Optional[int] = None,
     limit: int = 10,
 ) -> List[QueryResult]:
     tags = [tag.lower() for tag in (tags or [])]
@@ -581,6 +642,8 @@ def query_items(
 
     matched: List[QueryResult] = []
     for item in items:
+        if not _within_date_window(item, date_from=date_from, date_to=date_to, days=days):
+            continue
         frontmatter = item.frontmatter
         item_tags = [str(tag).lower() for tag in frontmatter.get("tags", [])]
         item_themes = [str(theme).lower() for theme in frontmatter.get("themes", [])]

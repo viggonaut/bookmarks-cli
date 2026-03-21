@@ -183,6 +183,79 @@ class QueryTests(unittest.TestCase):
             self.assertIn("expanded", results[0].matched_queries)
             self.assertIn("character", results[0].matched_terms)
 
+    def test_query_and_search_items_support_date_filters(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            older_item = InfluenceItem(
+                item_id="x:6",
+                source_type="x",
+                content_kind="post",
+                capture_kind="bookmark",
+                title="@garrytan: GStack update",
+                canonical_url="https://x.com/garrytan/status/6",
+                source_created_at="2026-03-10T12:00:00Z",
+                captured_at="2026-03-20T17:30:32Z",
+                processed_at="2026-03-20T17:30:31Z",
+                authors=[Author(name="Garry Tan", handle="garrytan", id="6", url="https://x.com/garrytan")],
+                language="en",
+                tags=["x", "bookmark", "gstack"],
+                themes=["startups"],
+                people=["@garrytan"],
+                entities=["GStack"],
+                summary="An older GStack note.",
+                key_ideas=["Earlier GStack post."],
+                raw_text_hash="pqr",
+                body_text="Older GStack context.",
+                source_metadata={"external_id": "6"},
+                storage={},
+            )
+            recent_item = InfluenceItem(
+                item_id="x:7",
+                source_type="x",
+                content_kind="post",
+                capture_kind="bookmark",
+                title="@garrytan: building on GStack",
+                canonical_url="https://x.com/garrytan/status/7",
+                source_created_at="2026-03-16T12:00:00Z",
+                captured_at="2026-03-20T17:30:32Z",
+                processed_at="2026-03-20T17:30:31Z",
+                authors=[Author(name="Garry Tan", handle="garrytan", id="7", url="https://x.com/garrytan")],
+                language="en",
+                tags=["x", "bookmark", "gstack"],
+                themes=["startups"],
+                people=["@garrytan"],
+                entities=["GStack"],
+                summary="Recent GStack note.",
+                key_ideas=["GStack update from last week."],
+                raw_text_hash="stu",
+                body_text="Recent GStack context.",
+                source_metadata={"external_id": "7"},
+                storage={},
+            )
+            self._write_item(root, older_item)
+            self._write_item(root, recent_item)
+
+            items = list(iter_markdown_items(root))
+            query_results = query_items(
+                items,
+                text="gstack",
+                date_from="2026-03-14",
+                date_to="2026-03-21",
+                limit=5,
+            )
+            search_results = search_items(
+                items,
+                query="gstack",
+                date_from="2026-03-14",
+                date_to="2026-03-21",
+                limit=5,
+            )
+
+            self.assertEqual(len(query_results), 1)
+            self.assertEqual(query_results[0].canonical_url, "https://x.com/garrytan/status/7")
+            self.assertEqual(len(search_results), 1)
+            self.assertEqual(search_results[0].canonical_url, "https://x.com/garrytan/status/7")
+
 
 if __name__ == "__main__":
     unittest.main()

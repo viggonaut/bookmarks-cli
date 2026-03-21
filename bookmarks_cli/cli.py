@@ -37,6 +37,12 @@ def _add_common_sync_flags(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--dry-run", action="store_true")
 
 
+def _add_common_retrieval_flags(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--date-from", default=None, help="Inclusive start date, e.g. 2026-03-14")
+    parser.add_argument("--date-to", default=None, help="Inclusive end date, e.g. 2026-03-21")
+    parser.add_argument("--days", type=int, default=None, help="Relative trailing window in days")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="bookmarks-cli")
     parser.add_argument("--env-file", default=".env")
@@ -84,6 +90,7 @@ def build_parser() -> argparse.ArgumentParser:
     query_x_parser.add_argument("--theme", action="append", default=None)
     query_x_parser.add_argument("--person", action="append", default=None)
     query_x_parser.add_argument("--author", default=None)
+    _add_common_retrieval_flags(query_x_parser)
     query_x_parser.add_argument("--limit", type=int, default=10)
     query_x_parser.add_argument("--format", choices=["text", "json"], default="text")
 
@@ -91,6 +98,7 @@ def build_parser() -> argparse.ArgumentParser:
     search_subparsers = search_parser.add_subparsers(dest="search_target", required=True)
     search_x_parser = search_subparsers.add_parser("x-bookmarks")
     search_x_parser.add_argument("--query", required=True)
+    _add_common_retrieval_flags(search_x_parser)
     search_x_parser.add_argument("--limit", type=int, default=10)
     search_x_parser.add_argument("--format", choices=["text", "json"], default="text")
 
@@ -281,6 +289,9 @@ def _run_query_x_bookmarks(settings: Settings, args: argparse.Namespace) -> int:
         themes=args.theme,
         people=args.person,
         author=args.author,
+        date_from=args.date_from,
+        date_to=args.date_to,
+        days=args.days,
         limit=args.limit,
     )
     return _print_query_results(results, args.format)
@@ -291,6 +302,9 @@ def _run_search_x_bookmarks(settings: Settings, args: argparse.Namespace) -> int
     results = search_items(
         items,
         query=args.query,
+        date_from=args.date_from,
+        date_to=args.date_to,
+        days=args.days,
         limit=args.limit,
     )
     return _print_query_results(results, args.format)

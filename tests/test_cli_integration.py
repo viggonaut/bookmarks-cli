@@ -117,6 +117,33 @@ class CliIntegrationTests(unittest.TestCase):
                 )
                 self.assertIn("exact", search_payload[0]["matched_queries"])
                 self.assertGreater(search_payload[0]["search_score"], 0)
+
+                dated_search_stdout = io.StringIO()
+                with redirect_stdout(dated_search_stdout):
+                    exit_code = main(
+                        [
+                            "--env-file",
+                            str(env_path),
+                            "search",
+                            "x-bookmarks",
+                            "--query",
+                            "portable",
+                            "--date-from",
+                            "2026-03-19",
+                            "--date-to",
+                            "2026-03-19",
+                            "--format",
+                            "json",
+                        ]
+                    )
+
+                self.assertEqual(exit_code, 0)
+                dated_payload = json.loads(dated_search_stdout.getvalue())
+                self.assertEqual(len(dated_payload), 1)
+                self.assertEqual(
+                    dated_payload[0]["canonical_url"],
+                    "https://x.com/syswriter/status/1899900000000000002",
+                )
             finally:
                 os.environ.clear()
                 os.environ.update(original_env)

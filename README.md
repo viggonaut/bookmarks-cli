@@ -120,6 +120,7 @@ python3 -m bookmarks_cli ingest x-bookmarks --input integrations/x/samples/bookm
 
 ```bash
 python3 -m bookmarks_cli search x-bookmarks --query "codex agents" --limit 5 --format json
+python3 -m bookmarks_cli search x-bookmarks --query "gstack" --date-from 2026-03-14 --date-to 2026-03-21 --limit 10 --format json
 ```
 
 10. Use the lower-level query command when you want exact field control:

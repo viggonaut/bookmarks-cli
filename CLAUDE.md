@@ -51,6 +51,13 @@ Default first step:
 python3 -m bookmarks_cli search x-bookmarks --query "<topic>" --limit 10 --format json
 ```
 
+If the request includes a time window like "from last week" or "from March 14 through March 21, 2026", translate that into explicit date flags:
+
+```bash
+python3 -m bookmarks_cli search x-bookmarks --query "<topic>" --date-from YYYY-MM-DD --date-to YYYY-MM-DD --limit 10 --format json
+python3 -m bookmarks_cli search x-bookmarks --query "<topic>" --days 7 --limit 10 --format json
+```
+
 If the query is broad or the result quality is mixed, follow with narrower passes:
 
 ```bash
