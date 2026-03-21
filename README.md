@@ -121,6 +121,7 @@ python3 -m bookmarks_cli ingest x-bookmarks --input integrations/x/samples/bookm
 ```bash
 python3 -m bookmarks_cli search x-bookmarks --query "codex agents" --limit 5 --format json
 python3 -m bookmarks_cli search x-bookmarks --query "gstack" --date-from 2026-03-14 --date-to 2026-03-21 --limit 10 --format json
+python3 -m bookmarks_cli search x-bookmarks --query "symphoni" --author openai --author openaidevs --days 14 --limit 10 --format json
 ```
 
 10. Use the lower-level query command when you want exact field control:
@@ -148,7 +149,8 @@ The X storage contract is:
 - one raw payload snapshot under `_meta/raw/x/YYYY/MM/DD/<post_id>.json`
 - direct source link stored as `canonical_url`
 - sync state under `_meta/state/`
-- local query over stored artifacts via `query x-bookmarks`
+- local retrieval over stored artifacts via `search x-bookmarks`
+- exact field filters via `query x-bookmarks`
 
 ## Core commands
 
@@ -161,6 +163,8 @@ python3 -m bookmarks_cli backfill x-bookmarks
 python3 -m bookmarks_cli sync x-bookmarks
 python3 -m bookmarks_cli rebuild x-bookmarks
 python3 -m bookmarks_cli search x-bookmarks --query "agents" --limit 5 --format json
+python3 -m bookmarks_cli search x-bookmarks --query "gstack" --days 7 --limit 10 --format json
+python3 -m bookmarks_cli search x-bookmarks --query "symphoni" --author openai --author openaidevs --days 14 --format json
 python3 -m bookmarks_cli query x-bookmarks --text "agents" --limit 5
 python3 -m bookmarks_cli sync x-bookmarks --source file --input path/to/bookmarks.json
 python3 -m bookmarks_cli ingest x-bookmarks --input path/to/bookmarks.json
@@ -180,10 +184,10 @@ python3 -m bookmarks_cli ingest x-bookmarks --input path/to/bookmarks.json
 
 For humans in an interactive shell, `bookmarks-cli` is the friendly command.
 
-For agents and automated runtimes, the canonical entrypoint is:
+For agents and automated runtimes, the canonical entrypoint is the module form:
 
 ```bash
-python3 -m bookmarks_cli sync x-bookmarks
+python3 -m bookmarks_cli ...
 ```
 
 Interactive-shell alternatives:
@@ -205,6 +209,14 @@ you may also need to add your Python user bin directory to `PATH`, for example:
 
 ```bash
 export PATH="$(python3 -m site --user-base)/bin:$PATH"
+```
+
+If packaging or network access is constrained and you only need local usage from your own machine, a practical fallback is:
+
+```bash
+export BOOKMARKS_PATH=/path/to/bookmarks-data
+export PYTHONPATH=/path/to/bookmarks-cli${PYTHONPATH:+:$PYTHONPATH}
+python3 -m bookmarks_cli doctor
 ```
 
 See:

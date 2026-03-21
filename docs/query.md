@@ -1,4 +1,4 @@
-# Query Workflow
+# Retrieval Workflow
 
 V1 retrieval is local-file-first.
 
@@ -26,13 +26,18 @@ python3 -m bookmarks_cli query x-bookmarks --theme agents --author dan --limit 5
 
 ## Retrieval model
 
-The query command currently supports:
+Use `search x-bookmarks` by default when the user gives a natural-language request.
+
+Use `query x-bookmarks` when you already know the exact field constraints you want.
+
+The query command supports:
 
 - text search across title, summary, key ideas, body text, author names/handles, and canonical URL
 - exact filters over tags
 - exact filters over themes
 - exact filters over people
 - author matching
+- explicit date filters via `--date-from`, `--date-to`, and `--days`
 
 The search command adds a higher-level retrieval workflow for natural-language requests:
 
@@ -41,6 +46,31 @@ The search command adds a higher-level retrieval workflow for natural-language r
 - small semantic expansions for terms like companions, characters, assistants, startups, and memory
 - merged ranking across multiple passes
 - strict source filtering when the request says "from <account>" or you pass `--author` / `--person`
+- typo-tolerant matching for near-miss tokens like `symphoni`
+
+## Output model
+
+For agents, prefer `--format json`.
+
+Search results now include:
+
+- `canonical_url`
+- `authors`
+- `search_score`
+- `matched_fields`
+- `matched_terms`
+- `matched_queries`
+- `why_relevant`
+
+That should usually be enough to answer without opening bookmark files directly.
+
+## Recommended agent workflow
+
+1. Start with `search x-bookmarks --format json`
+2. Add `--date-from` / `--date-to` or `--days` if the user mentions a time window
+3. Add `--author` and `--person` if the user asks for posts from a specific account
+4. Only drop to lower-level `query` calls if you need exact field control
+5. Only inspect files directly if the CLI output is still ambiguous
 
 ## Regenerating older artifacts
 

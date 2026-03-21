@@ -8,7 +8,8 @@ The primary active use case is X bookmarks:
 
 - historical onboarding via `backfill x-bookmarks`
 - incremental sync via `sync x-bookmarks`
-- local retrieval over stored artifacts via `query x-bookmarks`
+- natural-language retrieval over stored artifacts via `search x-bookmarks`
+- exact field retrieval via `query x-bookmarks`
 
 The durable bookmark archive lives outside the repo at `BOOKMARKS_PATH` (`INFLUENCE_PATH` still works as a legacy fallback).
 

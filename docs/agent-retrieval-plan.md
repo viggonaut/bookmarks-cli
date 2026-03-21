@@ -11,7 +11,19 @@ Success looks like this:
 - natural-language requests return relevant posts without brittle exact-phrase matching
 - results include direct X links and a short explanation of relevance
 
-## Current Gaps
+## Current State
+
+The core retrieval path now exists:
+
+- `search x-bookmarks` for natural-language retrieval
+- `query x-bookmarks` for exact field control
+- tokenized and weighted text matching
+- typo-tolerant matching for near-miss tokens
+- source-aware search for requests like `from OpenAI`
+- date-bounded retrieval via `--date-from`, `--date-to`, and `--days`
+- richer JSON output with `authors`, `matched_fields`, `matched_terms`, `matched_queries`, and `why_relevant`
+
+## Remaining Gaps
 
 ### 1. Discoverability is repo-local
 
@@ -21,28 +33,26 @@ The workflow is documented well inside this repo, but agents in other repos may 
 - inspect `.env` files to infer `BOOKMARKS_PATH`
 - grep the archive directly instead of using the supported CLI
 
-### 2. Query behavior is too literal
+### 2. Search ranking is still heuristic
 
-The current query path does:
+The current search path is materially better than exact substring matching, but it still relies on:
 
-- exact substring matching for `--text`
-- exact filters for `--tag`, `--theme`, and `--person`
-- author substring matching
-- recency sorting only
+- token overlap
+- small synonym expansions
+- author and date constraints
+- weighted field ranking
 
-That makes prompts like `AI companions`, `AI companies`, `AI character apps`, or `something Josh Puckett posted` fragile unless the exact words appear in stored text or enrichment.
+That means some results can still be noisy for broader conceptual searches.
 
-### 3. Agents still have to orchestrate retries manually
+### 3. Agents still decide when to broaden
 
-Today the agent has to decide when to retry with:
+The CLI now handles much more internally, but there is still a product decision boundary between:
 
-- `--author`
-- `--person`
-- `--theme`
-- `--tag`
-- `rebuild x-bookmarks`
+- strict source search
+- broader mention-only search
+- file inspection for ambiguous results
 
-That creates inconsistent behavior across sessions and tools.
+That boundary should stay clear in agent guidance.
 
 ## Recommended Stack
 
@@ -51,7 +61,7 @@ That creates inconsistent behavior across sessions and tools.
 Keep a short shared block in `AGENTS.md` and `CLAUDE.md` across active repos:
 
 - query local X bookmarks before brainstorming
-- prefer `python3 -m bookmarks_cli query x-bookmarks --format json`
+- prefer `python3 -m bookmarks_cli search x-bookmarks --format json`
 - use `doctor` if availability or archive path is unclear
 - only run `sync` when freshness is requested
 - run `rebuild` before direct archive inspection
@@ -78,38 +88,29 @@ A reusable skill or tool should encode the retrieval workflow once for agent env
 
 Repo-local markdown should point to the workflow, not carry the full logic everywhere.
 
-### 4. Stronger query semantics
+### 4. Better ranking and explanation
 
-Upgrade `query x-bookmarks` so natural-language requests degrade gracefully:
+The next retrieval improvements should focus on quality rather than basic capability:
 
-- tokenize text queries instead of requiring one exact substring
-- score title, summary, key ideas, authors, people, themes, and body separately
-- boost exact author and handle matches
-- support alias and synonym expansion
-- expose matched fields in results
+- better semantic expansion for product names and adjacent concepts
+- stronger penalties for broad partial matches
+- short matched excerpts in output
+- clearer separation between direct-source hits and mention-only hits
 
-Suggested scoring order:
+### 5. Keep the higher-level search command as the default
 
-1. exact author and handle matches
-2. title, summary, and key ideas
-3. themes, tags, and people
-4. body text
-5. recency as a tiebreaker
-
-### 5. Higher-level search command
-
-Add a command that performs the retry strategy internally, for example:
+The intended natural-language entrypoint is now:
 
 ```bash
 python3 -m bookmarks_cli search x-bookmarks --query "AI companions Josh Puckett" --limit 10 --format json
 ```
 
-Possible internal strategy:
+Current internal strategy:
 
 1. parse likely people and author terms
 2. run weighted text retrieval
-3. retry with extracted author and person filters
-4. expand candidate themes and tags
+3. apply explicit or inferred author/person constraints
+4. expand candidate themes and adjacent terms
 5. merge and rank results
 
 This removes prompt-specific orchestration from agents.
@@ -118,8 +119,10 @@ This removes prompt-specific orchestration from agents.
 
 Extend JSON output with fields that help agents explain results:
 
+- `authors`
 - `matched_fields`
 - `matched_terms`
+- `matched_queries`
 - `why_relevant`
 - short excerpt or top matching sentence
 
@@ -135,21 +138,22 @@ The goal is to let the agent answer directly from CLI output instead of opening 
 
 ### Phase 2: Retrieval quality
 
-- replace exact substring matching with tokenized scoring
-- add author and people weighting
-- add matched-field reporting
-- add tests for paraphrase-style queries
+- improve semantic expansion quality
+- add matched excerpts
+- separate direct-source hits from mention-only hits more explicitly
+- add tests for broader real-world query shapes
 
 ### Phase 3: One-shot agent UX
 
-- add a higher-level `search x-bookmarks` command
+- keep `search x-bookmarks` as the default path in all repo instructions
 - optionally package the retrieval workflow as a reusable skill
+- add a broader/narrower retry mode if user intent requires it
 
-## First Concrete Code Changes
+## Next Concrete Code Changes
 
 If implementing next, the highest-leverage sequence is:
 
-1. refactor `query_items` to return scored matches plus matched fields
-2. update `--format json` payload to include those fields
-3. add tests for paraphrase and author-led queries
-4. add a `search x-bookmarks` command that wraps the fallback sequence
+1. add matched excerpts or best matching sentence to JSON output
+2. add clearer direct-source vs mention-only markers
+3. tighten ranking for broad expansion matches
+4. package the retrieval workflow into a reusable skill or shared global instruction

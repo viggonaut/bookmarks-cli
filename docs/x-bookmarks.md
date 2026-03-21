@@ -44,7 +44,10 @@ python3 -m bookmarks_cli auth x-login
 python3 -m bookmarks_cli backfill x-bookmarks --source file --input /path/to/all-bookmarks.json
 python3 -m bookmarks_cli backfill x-bookmarks
 python3 -m bookmarks_cli rebuild x-bookmarks
-python3 -m bookmarks_cli query x-bookmarks --text "training" --limit 5
+python3 -m bookmarks_cli search x-bookmarks --query "training" --limit 5 --format json
+python3 -m bookmarks_cli search x-bookmarks --query "gstack" --days 7 --limit 10 --format json
+python3 -m bookmarks_cli search x-bookmarks --query "symphoni" --author openai --author openaidevs --days 14 --limit 10 --format json
+python3 -m bookmarks_cli query x-bookmarks --tag training --limit 5 --format json
 python3 -m bookmarks_cli sync x-bookmarks
 python3 -m bookmarks_cli sync x-bookmarks --limit 50
 python3 -m bookmarks_cli sync x-bookmarks --source file --input /path/to/bookmarks.json
@@ -65,6 +68,9 @@ python3 -m bookmarks_cli ingest x-bookmarks --input /path/to/bookmarks.json
 - `rebuild x-bookmarks`
   - rebuilds Markdown artifacts from local raw payload snapshots
   - lets you improve enrichment without paying to fetch the same bookmarks again
+- `search x-bookmarks`
+  - default retrieval path for natural-language requests
+  - supports time windows, source-aware search, and richer JSON output
 - `query x-bookmarks`
-  - searches stored Markdown artifacts locally
-  - returns titles, summaries, direct X links, and file paths
+  - lower-level exact retrieval over stored Markdown artifacts
+  - useful for explicit `tag`, `theme`, `person`, and `author` filters
