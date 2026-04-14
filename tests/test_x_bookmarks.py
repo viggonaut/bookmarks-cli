@@ -1,7 +1,10 @@
+import io
 import unittest
 from pathlib import Path
+from urllib.error import HTTPError
+from unittest.mock import patch
 
-from bookmarks_cli.integrations.x_bookmarks import FileBookmarkSource
+from bookmarks_cli.integrations.x_bookmarks import ApiBookmarkSource, FileBookmarkSource
 
 
 class XBookmarkTests(unittest.TestCase):
@@ -82,6 +85,34 @@ class XBookmarkTests(unittest.TestCase):
 
         self.assertEqual(bookmarks[0].external_id, "1899900000000000002")
         self.assertEqual(bookmarks[1].external_id, "1899900000000000001")
+
+    def test_api_source_surfaces_402_detail_and_file_mode_guidance(self) -> None:
+        source = ApiBookmarkSource(
+            api_base_url="https://api.x.com/2",
+            endpoint_template="/users/{user_id}/bookmarks",
+            access_token="token",
+            user_id="123",
+        )
+        error = HTTPError(
+            url="https://api.x.com/2/users/123/bookmarks",
+            code=402,
+            msg="Payment Required",
+            hdrs=None,
+            fp=io.BytesIO(
+                b'{"title":"Usage Cap Exceeded","detail":"Project monthly product cap reached."}'
+            ),
+        )
+
+        with patch("bookmarks_cli.integrations.x_bookmarks.urlopen", side_effect=error):
+            with self.assertRaises(RuntimeError) as context:
+                source.fetch_until_known(None, limit=10)
+
+        message = str(context.exception)
+        self.assertIn("status 402", message)
+        self.assertIn("Usage Cap Exceeded", message)
+        self.assertIn("Project monthly product cap reached.", message)
+        self.assertIn("paid access or credits", message)
+        self.assertIn("sync x-bookmarks --source file --input /path/to/bookmarks.json", message)
 
 
 if __name__ == "__main__":

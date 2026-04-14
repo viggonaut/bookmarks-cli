@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -448,56 +449,60 @@ def _run_x_bookmarks(
 def main(argv: Optional[list[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    settings = load_settings(Path.cwd(), env_file=args.env_file)
+    try:
+        settings = load_settings(Path.cwd(), env_file=args.env_file)
 
-    if args.command == "init":
-        return _run_init(settings)
+        if args.command == "init":
+            return _run_init(settings)
 
-    if args.command == "doctor":
-        _print_doctor(settings)
-        return 0
+        if args.command == "doctor":
+            _print_doctor(settings)
+            return 0
 
-    if args.command == "auth" and args.auth_target == "x-status":
-        return _run_x_auth_status(settings)
+        if args.command == "auth" and args.auth_target == "x-status":
+            return _run_x_auth_status(settings)
 
-    if args.command == "auth" and args.auth_target == "x-login":
-        return _run_x_auth_login(settings, args)
+        if args.command == "auth" and args.auth_target == "x-login":
+            return _run_x_auth_login(settings, args)
 
-    if args.command == "sync" and args.sync_target == "x-bookmarks":
-        return _run_x_bookmarks(
-            settings,
-            args,
-            mode_name="sync",
-            limit=args.limit or settings.x_bookmarks_limit,
-            state_file=settings.x_bookmark_state_file,
-        )
+        if args.command == "sync" and args.sync_target == "x-bookmarks":
+            return _run_x_bookmarks(
+                settings,
+                args,
+                mode_name="sync",
+                limit=args.limit or settings.x_bookmarks_limit,
+                state_file=settings.x_bookmark_state_file,
+            )
 
-    if args.command == "backfill" and args.backfill_target == "x-bookmarks":
-        return _run_x_bookmarks(
-            settings,
-            args,
-            mode_name="backfill",
-            limit=args.limit,
-            state_file=settings.x_bookmark_backfill_state_file,
-        )
+        if args.command == "backfill" and args.backfill_target == "x-bookmarks":
+            return _run_x_bookmarks(
+                settings,
+                args,
+                mode_name="backfill",
+                limit=args.limit,
+                state_file=settings.x_bookmark_backfill_state_file,
+            )
 
-    if args.command == "ingest" and args.ingest_target == "x-bookmarks":
-        return _run_x_bookmarks(
-            settings,
-            args,
-            mode_name="ingest",
-            limit=args.limit or settings.x_bookmarks_limit,
-            state_file=settings.x_bookmark_state_file,
-        )
+        if args.command == "ingest" and args.ingest_target == "x-bookmarks":
+            return _run_x_bookmarks(
+                settings,
+                args,
+                mode_name="ingest",
+                limit=args.limit or settings.x_bookmarks_limit,
+                state_file=settings.x_bookmark_state_file,
+            )
 
-    if args.command == "rebuild" and args.rebuild_target == "x-bookmarks":
-        return _run_rebuild_x_bookmarks(settings, args)
+        if args.command == "rebuild" and args.rebuild_target == "x-bookmarks":
+            return _run_rebuild_x_bookmarks(settings, args)
 
-    if args.command == "query" and args.query_target == "x-bookmarks":
-        return _run_query_x_bookmarks(settings, args)
+        if args.command == "query" and args.query_target == "x-bookmarks":
+            return _run_query_x_bookmarks(settings, args)
 
-    if args.command == "search" and args.search_target == "x-bookmarks":
-        return _run_search_x_bookmarks(settings, args)
+        if args.command == "search" and args.search_target == "x-bookmarks":
+            return _run_search_x_bookmarks(settings, args)
 
-    parser.error("Unsupported command.")
-    return 2
+        parser.error("Unsupported command.")
+        return 2
+    except (RuntimeError, ValueError) as exc:
+        print(f"error={exc}", file=sys.stderr)
+        return 1

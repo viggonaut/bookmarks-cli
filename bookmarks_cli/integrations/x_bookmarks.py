@@ -25,6 +25,55 @@ from bookmarks_cli.models import Author, InfluenceItem
 from bookmarks_cli.storage import parse_timestamp, utc_now_iso
 
 
+def _extract_http_error_detail(exc: HTTPError) -> str:
+    try:
+        raw_detail = exc.read().decode("utf-8", errors="replace").strip()
+    except OSError:
+        raw_detail = ""
+
+    if not raw_detail:
+        return ""
+
+    try:
+        payload = json.loads(raw_detail)
+    except json.JSONDecodeError:
+        return raw_detail
+
+    detail_parts: List[str] = []
+    for key in ("title", "detail", "reason", "message", "error"):
+        value = payload.get(key)
+        if value:
+            detail_parts.append(str(value))
+
+    errors = payload.get("errors")
+    if isinstance(errors, list):
+        for error in errors:
+            if not isinstance(error, dict):
+                continue
+            for key in ("message", "detail", "reason", "title"):
+                value = error.get(key)
+                if value:
+                    detail_parts.append(str(value))
+
+    if detail_parts:
+        return " | ".join(unique(detail_parts))
+    return raw_detail
+
+
+def _format_x_api_http_error(exc: HTTPError) -> str:
+    detail = _extract_http_error_detail(exc)
+    message = f"X API request failed with status {exc.code}"
+    if detail:
+        message = f"{message}: {detail}"
+    if exc.code == 402:
+        message = (
+            f"{message}. This usually means the X project does not currently have paid access "
+            "or credits for the bookmarks endpoint. Restore API access or switch to file mode "
+            "with `python3 -m bookmarks_cli sync x-bookmarks --source file --input /path/to/bookmarks.json`."
+        )
+    return message
+
+
 def _sort_bookmarks_newest_first(bookmarks: List["XBookmark"]) -> List["XBookmark"]:
     return sorted(
         bookmarks,
@@ -360,7 +409,7 @@ class ApiBookmarkSource:
                 with urlopen(request, timeout=30) as response:
                     payload = json.loads(response.read().decode("utf-8"))
             except HTTPError as exc:
-                raise RuntimeError(f"X API request failed with status {exc.code}.") from exc
+                raise RuntimeError(_format_x_api_http_error(exc)) from exc
             except URLError as exc:
                 raise RuntimeError(f"X API request failed: {exc.reason}.") from exc
 
@@ -399,7 +448,7 @@ class ApiBookmarkSource:
                 with urlopen(request, timeout=30) as response:
                     payload = json.loads(response.read().decode("utf-8"))
             except HTTPError as exc:
-                raise RuntimeError(f"X API request failed with status {exc.code}.") from exc
+                raise RuntimeError(_format_x_api_http_error(exc)) from exc
             except URLError as exc:
                 raise RuntimeError(f"X API request failed: {exc.reason}.") from exc
 
